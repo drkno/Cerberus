@@ -1,0 +1,1827 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PCR1000</name>
+    </assembly>
+    <members>
+        <member name="T:PCR1000.AutoUpdateDataRecv">
+            <summary>
+            In AutoUpdate mode data was received.
+            </summary>
+            <param name="sender">The IComm object that received the communication.</param>
+            <param name="recvTime">The time which the communication was received.</param>
+            <param name="data">The data received.</param>
+        </member>
+        <member name="T:PCR1000.IComm">
+            <summary>
+            Communications interface. All PCR1000 communications should happen through
+            classes derived from this interface.
+            </summary>
+        </member>
+        <member name="M:PCR1000.IComm.GetRawPort">
+            <summary>
+            Gets the object refering to the raw communications port.
+            </summary>
+            <returns>The communications port object.</returns>
+        </member>
+        <member name="M:PCR1000.IComm.SetDebugLogger(System.Boolean)">
+            <summary>
+            Enables or disables debug logging in the comminication library.
+            </summary>
+            <param name="debug">Enable or disable.</param>
+        </member>
+        <member name="M:PCR1000.IComm.Send(System.String)">
+            <summary>
+            Sends a messsage to the PCR1000.
+            </summary>
+            <param name="cmd">The command to send.</param>
+            <returns>If sending succeeded.</returns>
+        </member>
+        <member name="M:PCR1000.IComm.SendWait(System.String,System.Boolean)">
+            <summary>
+            Sends a message to the PCR1000 and waits for a reply.
+            </summary>
+            <param name="cmd">The command to send.</param>
+            <param name="overrideAutoupdate">When in autoupdate mode behaves like Send()
+            this overrides that behaviour.</param>
+            <returns>The reply or "" if nothing is received.</returns>
+        </member>
+        <member name="M:PCR1000.IComm.GetLastReceived">
+            <summary>
+            Gets the latest message from the PCR1000.
+            </summary>
+            <returns>The latest message.</returns>
+        </member>
+        <member name="M:PCR1000.IComm.GetPrevReceived">
+            <summary>
+            Gets the previously received message.
+            </summary>
+            <returns>The previous message.</returns>
+        </member>
+        <member name="M:PCR1000.IComm.PcrOpen">
+            <summary>
+            Opens the PCR1000 serial port.
+            </summary>
+            <returns>Success</returns>
+        </member>
+        <member name="M:PCR1000.IComm.PcrClose">
+            <summary>
+            Closes the PCR1000 serial port.
+            </summary>
+            <returns>Success</returns>
+        </member>
+        <member name="E:PCR1000.IComm.AutoUpdateDataReceived">
+            <summary>
+            Data received in autoupdate mode.
+            </summary>
+        </member>
+        <member name="P:PCR1000.IComm.AutoUpdate">
+            <summary>
+            Gets and sets autoupdate mode.
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrComm">
+            <summary>
+            PCR1000 COM Port Communications Class
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm.RecvTimeout">
+            <summary>
+            Number of 50ms timeouts to wait before aborting in SendWait.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm._serialPort">
+            <summary>
+            The serial port of the PCR1000.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm.TrimChars">
+            <summary>
+            Unnessercery characters potentially returned in each message.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm._msgSlot1">
+            <summary>
+            Last two received messages.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm._msgSlot2">
+            <summary>
+            Last two received messages.
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrComm.#ctor(System.String,System.Int32)">
+            <summary>
+            Instantiate a new PcrComm object to communicate with the PCR1000.
+            </summary>
+            <param name="port">COM Port to communicate on. Defaults to COM1</param>
+            <param name="baud">Baud rate to use. Defaults to 9600.</param>
+        </member>
+        <member name="M:PCR1000.PcrComm.GetRawPort">
+            <summary>
+            Gets the object refering to the raw communications port.
+            </summary>
+            <returns>The communications port object.</returns>
+        </member>
+        <member name="F:PCR1000.PcrComm._debugLogger">
+            <summary>
+            Keeps track of wheather debug logging is enabled.
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrComm.SetDebugLogger(System.Boolean)">
+            <summary>
+            Enables or disables debug logging in the comminication library.
+            </summary>
+            <param name="debug">Enable or disable.</param>
+        </member>
+        <member name="M:PCR1000.PcrComm.SerialPortDataReceived(System.Object,System.IO.Ports.SerialDataReceivedEventArgs)">
+            <summary>
+            Method called when data is received from the serial port.
+            </summary>
+            <param name="sender">The serial port that called the method.</param>
+            <param name="e">Event arguments.</param>
+        </member>
+        <member name="M:PCR1000.PcrComm.Send(System.String)">
+            <summary>
+            Sends a messsage to the PCR1000.
+            </summary>
+            <param name="cmd">The command to send.</param>
+            <returns>If sending succeeded.</returns>
+        </member>
+        <member name="M:PCR1000.PcrComm.SendWait(System.String,System.Boolean)">
+            <summary>
+            Sends a message to the PCR1000 and waits for a reply.
+            </summary>
+            <param name="cmd">The command to send.</param>
+            <param name="overrideAutoupdate">When in autoupdate mode behaves like Send()
+            this overrides that behaviour.</param>
+            <returns>The reply or "" if nothing is received.</returns>
+        </member>
+        <member name="M:PCR1000.PcrComm.GetLastReceived">
+            <summary>
+            Gets the latest message from the PCR1000.
+            </summary>
+            <returns>The latest message.</returns>
+        </member>
+        <member name="M:PCR1000.PcrComm.GetPrevReceived">
+            <summary>
+            Gets the previously received message.
+            </summary>
+            <returns>The previous message.</returns>
+        </member>
+        <member name="M:PCR1000.PcrComm.PcrOpen">
+            <summary>
+            Opens the PCR1000 serial port.
+            </summary>
+            <returns>Success</returns>
+        </member>
+        <member name="M:PCR1000.PcrComm.PcrClose">
+            <summary>
+            Closes the PCR1000 serial port.
+            </summary>
+            <returns>Success</returns>
+        </member>
+        <member name="E:PCR1000.PcrComm.AutoUpdateDataReceived">
+            <summary>
+            Data received in autoupdate mode.
+            </summary>
+        </member>
+        <member name="P:PCR1000.PcrComm.AutoUpdate">
+            <summary>
+            Gets and sets autoupdate mode.
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrComm.RecvMsg">
+            <summary>
+            Received message structure.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm.RecvMsg.Message">
+            <summary>
+            The message received.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrComm.RecvMsg.Time">
+            <summary>
+            The time the message was received.
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrControl">
+            <summary>
+                Control class for the PCR1000
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PcrDefaultPort">
+            <summary>
+                Default COM port to listen on.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PcrDefaultSpeed">
+            <summary>
+                Default rate.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl._pcrComm">
+            <summary>
+                The currently active Primitive Communication Object.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl._pcrErrRead">
+            <summary>
+                Was there an error reading from the PComm object?
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl._pcrRadio">
+            <summary>
+                Currently active radio data.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl._pcrStatus">
+            <summary>
+                The state of the PComm object (on or off).
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrControl.#ctor(System.String,System.Int32)">
+            <summary>
+                Constructor. Initialises the class.
+            </summary>
+            <param name="port">COM Port to use.</param>
+            <param name="speed">COM Speed to use.</param>
+        </member>
+        <member name="M:PCR1000.PcrControl.#ctor(System.Int32,System.String)">
+            <summary>
+                Constructor. Initialises the class.
+            </summary>
+            <param name="nethost">Internet server to use.</param>
+            <param name="netport">Internet port to use.</param>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrCheckResponse(System.String,System.Boolean)">
+            <summary>
+                Internally called method to check radio response.
+                Read from the radio for the #PCRAOK and #PCRABAD reply.
+            </summary>
+            <param name="response">The response to check.</param>
+            <param name="overrideAutoupdate">Trys to verify response during autoupdate mode.</param>
+            <returns>
+                true - for PCRAOK, false - for PCRABAD, false -
+                and sets ErrRead to true if garbage was read.
+                If autoupdate mode is enabled will return true
+                without overrideAutoupdate enabled.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetAutoGain">
+            <summary>
+                Get current session's autogain value.
+                Checks #PcrRadio struct for member #PcrAutoGain
+                for the current auto-gain setting.
+            </summary>
+            <returns>
+            The boolean of the current setting. True/false :: On/off.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetAutoGainStr">
+            <summary>
+                Get current session's autogain value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetFilter">
+            <summary>
+                Get the current session's filter setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetFilterStr">
+            <summary>
+                Get the current session's filter setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetFreq">
+            <summary>
+                Gets current session's frequency setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetFreqStr">
+            <summary>
+                Gets current session's frequency setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetMode">
+            <summary>
+                Gets current session's mode setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetModeStr">
+            <summary>
+                Gets current session's mode setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetNb">
+            <summary>
+                Get current session's noiseblank value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetNbStr">
+            <summary>
+                Get current session's noiseblank value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetPort">
+            <summary>
+                Gets current port / serial device setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetRadioInfo">
+            <summary>
+                Retrieves the current radio struct.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetRadioInfo(PCR1000.PcrControl.PRadInf)">
+            <summary>
+                Sets the radio structure and values then updates the radio to reflect them.
+                PcrSpeed and PcrPort are currently ignored due to implementation bugs.
+            </summary>
+            <param name="radioInf">New radio structure.</param>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetRfAttenuator">
+            <summary>
+                Get current session's RF Attenuation value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetRfAttenuatorStr">
+            <summary>
+                Get current session's RF Attenuation value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetSpeedT">
+            <summary>
+                Gets current speed.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetSpeed">
+            <summary>
+                Gets current speed.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetSquelch">
+            <summary>
+                Gets current session's squelch setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetSquelchStr">
+            <summary>
+                Gets current session's squelch setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetToneSq">
+            <summary>
+                Gets the current session's tone squelch (undecoded version).
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetToneSqStr">
+            <summary>
+                Gets the current session's tone squelch (decoded version).
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetVolume">
+            <summary>
+                Gets current session's volume setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrGetVolumeStr">
+            <summary>
+                Gets current session's volume setting.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrInit(System.Boolean)">
+            <summary>
+                Initialise the radio.
+            </summary>
+            <param name="autoUpdate">Initialise the radio in autoUpdate mode</param>
+            <returns>On success : true otherwise false.</returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrIsOn">
+            <summary>
+                Inquire radio status.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrPowerDown">
+            <summary>
+                Powers the radio down.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrPowerUp">
+            <summary>
+                Powers the radio on.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrQueryOn">
+            <summary>
+                Querys radio acutator status.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrQuerySquelch">
+            <summary>
+                Querys radio's squelch status.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetAutoGain(System.Boolean)">
+            <summary>
+                Toggle autogain functionality.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetFilter(System.String)">
+            <summary>
+                Sets current session's filter.
+            </summary>
+            <param name="filter"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetAutoupdate(System.Boolean)">
+            <summary>
+                Sets if autoupdate is enabled.
+            </summary>
+            <param name="autoupdate"></param>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetFilter(System.Int32)">
+            <summary>
+                Sets current session's filter.
+            </summary>
+            <param name="filter"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetFreq(System.UInt64)">
+            <summary>
+                Set the current frequency.
+            </summary>
+            <param name="freq"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetMode(System.String)">
+            <summary>
+                Set the current session's mode.
+                Valid arguments for \a mode:
+                - USB	upper side band
+                - LSB	lower side band
+                - AM	amplitude modulated
+                - NFM	narrow band FM
+                - WFM	wide band FM
+                - CW	continuous wave
+                The concept is the same as above ( #PcrSetFreq ) except it accepts
+                standard text for "USB"/"LSB" etc... Use of the pcrdef codes
+                are not necessary, they will be decoded based on \a mode.
+            </summary>
+            <param name="mode">Plain text string of mode (eg: "USB")</param>
+            <returns>True or false based on success or failure.</returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetNb(System.Boolean)">
+            <summary>
+                Toggle Noiseblanking functionality.
+                Valid values for \a value are:
+                - true to activate noiseblanking
+                - false to deactivate noiseblanking
+                Sets the noise blanking to \a value
+                (on/off) true/false... checks the radio response
+                if ok, then sets the value
+            </summary>
+            <param name="value">Value true or false for noiseblanking on or off</param>
+            <returns>
+            True, on success otherwise returns false.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetPort(System.String)">
+            <summary>
+                Set the port for the current session.
+                Sets port by closing the filedes and reopening it
+                on the new port.
+            </summary>
+            <param name="port">The port</param>
+            <returns>
+            True or false if the serial device can be opened on the new port.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetRfAttenuator(System.Boolean)">
+            <summary>
+                Toggle RF Attenuation functionality.
+                Valid values for \a value are:
+                - true to activate RF Attenuation
+                - false to deactivate RF Attenuation
+                Sets the RF Attenuation to \a value
+                (on/off) true/false... checks the radio response
+                if ok, then sets the value
+            </summary>
+            <param name="value">Value true or false for RF Attenuation on or off</param>
+            <returns>
+            True, on success otherwise returns false.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetSpeed(System.Int32)">
+            <summary>
+                Sets the speed for current session.
+                First we check to see if the baudrate passed 
+                in \a speed is right, if not then we just quietly 
+                return false. Then we decode \a speed and set 
+                #PcrInitSpeed to #pcrcmd_t version.
+                Then we tell the radio to switch speeds and
+                set baudrate on the port by destroying PComm
+                and reinitiating it with the new baud setting
+                Warning: follow these procedures to use this function.
+                -create the object (at last known baudrate).
+                -call init
+                -call power up
+                -call this function
+                -delete the object
+                -create the object with the new speed setting
+            </summary>
+            <param name="speed">Speed baudrate.</param>
+            <returns>True or false based on success.</returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetSquelch(System.Int32)">
+            <summary>
+                Set the current session's squelch.
+                sprintf converts (and combines) the cmd #PCRSQL with
+                the argument \a squelch , such that the argument has a 
+                minimum field width of two chars. If the field 
+                is less than 2 chars (ie: arg=5) then it pads the field 
+                with one zero.
+            </summary>
+            <param name="squelch">an integer between 0 and 100</param>
+            <returns>
+            true or false based on #PcrCheckResponse to indicate
+            success or failure
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetToneSq(System.String)">
+            <summary>
+                Sets current session CTCSS.
+                set's the tone squelch for the radio. The default is
+                value 00 for off. The values are \b NOT the hz, but the
+                #pcrdef.h vals, 01=67.0 02=69.3 etc... 
+            </summary>
+            <param name="value">character string of 01-35 hex</param>
+            <returns>
+            true or false based on #PcrCheckResponse success or failure.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetToneSq(System.Single)">
+            <summary>
+                Sets session CTCSS based on a float value.
+                Since the previous method requires the programmer to
+                remember the PCR-1000's internal number that corresponds
+                to the tone squelch frequency, this overloaded method
+                allows the programmer to pass a float, where the float
+                is the frequency (Hz) in question.
+            </summary>
+            <param name="passValue">tone squelch in Hz</param>
+            <returns>
+            true or false based on #PcrCheckResponse 
+            success or failure. On failure, it turns off CTCSS
+            and returns false.
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSetVolume(System.Int32)">
+            <summary>
+                Set the current session's volume.
+                sprintf converts (and combines) the cmd #PCRVOL with
+                the argument, such that the argument has a minimum field width
+                of two chars. If the field is less than 2 chars (ie: arg=5) then it
+                pads the field with one zero.
+            </summary>
+            <param name="volume">Volume an integer between 0 and 100</param>
+            <returns>
+            true or false based on #PcrCheckResponse to indicate success or failure
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSigStrength">
+            <summary>
+                Querys the signal strength.
+            </summary>
+            <returns>integer value of 0-255 on signal strength.</returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.PcrSigStrengthStr">
+            <summary>
+                Querys the signal strength.
+            </summary>
+            <returns>
+            null on failure, otherwise a character string
+            with the current signal strenth. This includes the I1
+            header, plus the last two characters which is the
+            \b hex value from \a 00-99
+            </returns>
+        </member>
+        <member name="M:PCR1000.PcrControl.SetComDebugLogging(System.Boolean)">
+            <summary>
+            Writes Raw COM Port IO to the Console
+            </summary>
+            <param name="log">Enable/Disable</param>
+        </member>
+        <member name="M:PCR1000.PcrControl.DebugRawSend(System.String)">
+            <summary>
+            Sends a raw string to the port
+            </summary>
+            <param name="raw">The raw string to send</param>
+        </member>
+        <member name="M:PCR1000.PcrControl.DebugRawSendWait(System.String)">
+            <summary>
+            Sends a raw string to the socket and waits for a response
+            </summary>
+            <param name="raw">The raw string to send</param>
+            <returns>The port response</returns>
+        </member>
+        <member name="T:PCR1000.PcrControl.PRadInf">
+            <summary>
+                Stores the important radio information for the current
+                state of the radio.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrAutoGain">
+            <summary>
+                Currenly set autogain
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrAutoUpdate">
+            <summary>
+                Currently set update mode?
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrFilter">
+            <summary>
+                Currently set radio Filter [128]
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrFreq">
+            <summary>
+                Currently set frequency
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrInitSpeed">
+            <summary>
+                Currently set speed (char * version, unstable) [8]
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrMode">
+            <summary>
+                Currently set radio Mode [128]
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrNoiseBlank">
+            <summary>
+                Currently set noiseblanking
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrPort">
+            <summary>
+                Currently active port/device [64]
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrRfAttenuator">
+            <summary>
+                Currently set RF Attenuation
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrSpeed">
+            <summary>
+                Currently set speed (uint var)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrSquelch">
+            <summary>
+                Currently set squlech
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrToneSq">
+            <summary>
+                Currently set CTCSS (unstable)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrToneSqFloat">
+            <summary>
+                Currently set CTCSS (float)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrControl.PRadInf.PcrVolume">
+            <summary>
+                Currently set volume
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrDef">
+            <summary>
+            Class containing PCR1000 commands.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQST">
+            <summary>
+            Suffix for Radio Query
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRECMD">
+            <summary>
+            Suffix for execute command 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRINITM">
+            <summary>
+            Init, manual probe 
+            \b Warning: after issueing an init DO NOT
+                 read(). If you do, the read() will block and wont return.
+                 the radio doesn't return data after an initialization. You
+                 must close the socket, and reopen it. You wont have to reopen
+                 the socket with wierd opts, unless you reset the socket to 
+                 the state as it was before .
+            \sa PCRINITA
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRINITA">
+            <summary>
+            Init, Auto probe
+            \b Warning: after issueing an init DO NOT
+                 read(). If you do, the read() will block and wont return.
+                 the radio doesn't return data after an initialization. You
+                 must close the socket, and reopen it. You wont have to reopen
+                 the socket with wierd opts, unless you reset the socket to 
+                 the state as it was before .
+            \sa PCRINITM
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSIG">
+            <summary>
+            Signal Update (G3)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSIGOFF">
+            <summary>
+            Program should poll status from radio (G300)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSIGON">
+            <summary>
+            Radio sends status automagically when a change (G301)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSIGBOFF">
+            <summary>
+            Binary mode off (G302)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSIGBON">
+            <summary>
+            Binary mode on  (G303)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRPWR">
+            <summary>
+            Power (H1)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRPWROFF">
+            <summary>
+            Power radio down (H100)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRPWRON">
+            <summary>
+            Power radio up   (H101)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRPWRQRY">
+            <summary>
+            Radio power query
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRVOL">
+            <summary>
+            Volume prefix (J40) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRVOLON">
+            <summary>
+            Volume at 75 % (J4075)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRVOLOFF">
+            <summary>
+            Volume at MUTE (J4000)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSQL">
+            <summary>
+            Squelch Prefix (J41) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSQLO">
+            <summary>
+            Fully Open (J4100) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSQLC">
+            <summary>
+            Closed squelch at 45% (J4145) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRIF">
+            <summary>
+            IF Shift Prefix (J43) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRIFC">
+            <summary>
+            IF Centered (J4380)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRAGC">
+            <summary>
+            Automatic Gain Control Prefix (J45) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRAGCOFF">
+            <summary>
+            AGC Off (J4500) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRAGCON">
+            <summary>
+            AGC On  (J4501) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRNB">
+            <summary>
+            Noise Blanking Prefix (J46) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRNBOFF">
+            <summary>
+            Noise Blanking Off (J4600) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRNBON">
+            <summary>
+            Noise Blanking On  (J4601) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRFA">
+            <summary>
+            RF Attenuator Prefix 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRFAOFF">
+            <summary>
+            RF Attenuator Off (J4700) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRFAON">
+            <summary>
+            RF Attenuator On (J4701) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRVSC">
+            <summary>
+            VSC Prefix (J50) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRVSCOFF">
+            <summary>
+            VSC Off (J5000) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRVSCON">
+            <summary>
+            VSC On  (J5001) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRTSQL">
+            <summary>
+            CTCSS - Tone Squelch Prefix (J51) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRTSQLOFF">
+            <summary>
+            CTCSS - Tone Squelch Off (J5100) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRUNK01">
+            <summary>
+            Unknown - 1
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRUNK02">
+            <summary>
+            Unknown - 2
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRTFLTR">
+            <summary>
+            Tracking filter Prefix (LD082) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRTFLTR00">
+            <summary>
+            Automagic Tracking Filter (LD8200) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRTFLTR01">
+            <summary>
+            Manual Tracking Filter (LD8201) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRFRQ">
+            <summary>
+            Freq. Header (K0) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.MAXFRQLEN">
+            <summary>
+            freq. len. 10 bytes (padded) GMMMKKKHHH (10) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.LOWERFRQ">
+            <summary>
+            lower bounds for frequency 50 kHz (50000) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.UPPERFRQ">
+            <summary>
+            upper bound for frequency 1.3 GHz (1300000000) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODLSB">
+            <summary>
+            Lower sideband (00) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODUSB">
+            <summary>
+            Upper sideband (01) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODAM">
+            <summary>
+            Amplitude Modulated (02) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODCW">
+            <summary>
+            Continuous Mode (03) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODUNK">
+            <summary>
+            unknown mode -- (04) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODNFM">
+            <summary>
+            Narrowband FM (05) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRMODWFM">
+            <summary>
+            Wideband FM (06) 
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRFLTR3">
+            <summary>
+            3 kHz Filter (00)	
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRFLTR6">
+            <summary>
+            6 kHz Filter (01) 	
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRFLTR15">
+            <summary>
+            15 kHz Filter (02) 	
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRFLTR50">
+            <summary>
+            50 kHz Filter (03) 	
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRFLTR230">
+            <summary>
+            230 kHz Filter (04)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQSQL">
+            <summary>
+            Query Squelch Setting (I0)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQRST">
+            <summary>
+            Query Signal Strength (I1)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQOFST">
+            <summary>
+            Query Frequency Offset (I2)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQDTMF">
+            <summary>
+            Query presense of DTMF Tone (I3)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQWAREZ">
+            <summary>
+            Query Firmware revision (I4)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQDSP">
+            <summary>
+            Query Presense of DSP (I5)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRQCTY">
+            <summary>
+            Query country / region (I6)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRAOK">
+            <summary>
+            Reply: Ok (G000)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBOK">
+            <summary>
+            Reply: Ok corrupt (G00?)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRABAD">
+            <summary>
+            Reply: There was an error (G001)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADSP">
+            <summary>
+            DSP Header (PCRQDSP)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADSPNO">
+            <summary>
+            Not present (GD00)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADSPOK">
+            <summary>
+            Present (GD01)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRASQL">
+            <summary>
+            Squelch Header (PCRQSQL)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRASQLCL">
+            <summary>
+            Sqlch Closed (04)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRASQLOPN">
+            <summary>
+            Sqlch Open (07)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRARST">
+            <summary>
+            Signal Strength (PCRQRST)
+            \b note: You have this header
+                     plus 00-FF from weak to strong
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRAOFST">
+            <summary>
+            Frequency offset Header (PCRQOFST)
+            \b note: plus 00-7F from extreme (-) to near ctr OR
+                     plus 81-FF from near ctr to extreme (+)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRAOFSTCTR">
+            <summary>
+            Frequency (offset) centered (I280)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF">
+            <summary>
+            DTMF Header (PCRQDTMF)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFNO">
+            <summary>
+            DTMF Not Heard (I300)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF0">
+            <summary>
+            DTMF 0 (I310)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF1">
+            <summary>
+            DTMF 1 (I311)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF2">
+            <summary>
+            DTMF 2 (I312)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF3">
+            <summary>
+            DTMF 3 (I313)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF4">
+            <summary>
+            DTMF 4 (I314) 	
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF5">
+            <summary>
+            DTMF 5 (I315)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF6">
+            <summary>
+            DTMF 6 (I315)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF7">
+            <summary>
+            DTMF 7 (I316)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF8">
+            <summary>
+            DTMF 8 (I318)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMF9">
+            <summary>
+            DTMF 9 (I319)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFA">
+            <summary>
+            DTMF A (I31A)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFB">
+            <summary>
+            DTMF B (I31B)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFC">
+            <summary>
+            DTMF C (I31C)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFD">
+            <summary>
+            DTMF D (I31D)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFS">
+            <summary>
+            DTMF * (I31E)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRADTMFP">
+            <summary>
+            DTMF # (I31F)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD">
+            <summary>
+            Baud Rate Header (G1)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD300">
+            <summary>
+            300 baud (G100)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD1200">
+            <summary>
+            1200 baud (G101)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD2400">
+            <summary>
+            2400 baud (G102)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD9600">
+            <summary>
+            9600 baud (G103)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD19200">
+            <summary>
+            19200 baud (G104)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRBD38400">
+            <summary>
+            38400 baud (G105)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRSBSC">
+            <summary>
+            bandscope prefix SENT (ME00001)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC">
+            <summary>
+            bandscope prefix RECV (NE1)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC0">
+            <summary>
+            packet 0 (NE100)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC1">
+            <summary>
+            packet 1 (NE110)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC2">
+            <summary>
+            packet 2 (NE120)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC3">
+            <summary>
+            packet 3 (NE130)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC4">
+            <summary>
+            packet 4 (NE140)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC5">
+            <summary>
+            packet 5 (NE150)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC6">
+            <summary>
+            packet 6 (NE160)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC7">
+            <summary>
+            packet 7 (NE170)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC8">
+            <summary>
+            packet 8 (NE180)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSC9">
+            <summary>
+            packet 9 (NE190)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSCA">
+            <summary>
+            packet 10 (NE1A0)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSCB">
+            <summary>
+            packet 11 (NE1B0)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSCC">
+            <summary>
+            packet 12 (NE1C0)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSCD">
+            <summary>
+            packet 13 (NE1D0)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSCE">
+            <summary>
+            packet 14 (NE1E0)
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrDef.PCRRBSCF">
+            <summary>
+            packet 15 (NE1F0)
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrNetworkClient">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient.RecvTimeout">
+            <summary>
+            Number of 50ms timeouts to wait before aborting in SendWait.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient.TrimChars">
+            <summary>
+            Unnessercery characters potentially returned in each message.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient._msgSlot1">
+            <summary>
+            Last two received messages.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient._msgSlot2">
+            <summary>
+            Last two received messages.
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrNetworkClient.#ctor(System.String,System.Int32)">
+            <summary>
+            Instantiates a new PCR1000 network client.
+            </summary>
+            <param name="server">The server to connect to.</param>
+            <param name="port">The port to connect to.</param>
+            <exception cref="T:System.ArgumentException">If invalid arguments are provided.</exception>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient._debugLogger">
+            <summary>
+            Keeps track of wheather debug logging is enabled.
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrNetworkClient.SetDebugLogger(System.Boolean)">
+            <summary>
+            Enables or disables debug logging in the comminication library.
+            </summary>
+            <param name="debug">Enable or disable.</param>
+        </member>
+        <member name="M:PCR1000.PcrNetworkClient.SendWait(System.String,System.Boolean)">
+            <summary>
+            Sends a message to the PCR1000 and waits for a reply.
+            </summary>
+            <param name="cmd">The command to send.</param>
+            <param name="overrideAutoupdate">When in autoupdate mode behaves like Send()
+            this overrides that behaviour.</param>
+            <returns>The reply or "" if nothing is received.</returns>
+        </member>
+        <member name="M:PCR1000.PcrNetworkClient.GetLastReceived">
+            <summary>
+            Gets the latest message from the PCR1000.
+            </summary>
+            <returns>The latest message.</returns>
+        </member>
+        <member name="M:PCR1000.PcrNetworkClient.GetPrevReceived">
+            <summary>
+            Gets the previously received message.
+            </summary>
+            <returns>The previous message.</returns>
+        </member>
+        <member name="E:PCR1000.PcrNetworkClient.AutoUpdateDataReceived">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrNetworkClient.RecvMsg">
+            <summary>
+            Received message structure.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient.RecvMsg.Message">
+            <summary>
+            The message received.
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkClient.RecvMsg.Time">
+            <summary>
+            The time the message was received.
+            </summary>
+        </member>
+        <member name="T:PCR1000.PcrNetworkServer">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:PCR1000.PcrNetworkServer._serialPort">
+            <summary>
+            The serial port of the PCR1000.
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrNetworkServer.#ctor(System.Int32,System.String,System.Int32)">
+            <summary>
+            Instantiate a new PcrNetwork object to communicate with the PCR1000.
+            </summary>
+            <param name="netport">Network port to communucate on. Defaults to 4456.</param>
+            <param name="port">COM Port to communicate on. Defaults to COM1.</param>
+            <param name="baud">Baud rate to use. Defaults to 9600.</param>
+        </member>
+        <member name="F:PCR1000.PcrNetworkServer._debugLogger">
+            <summary>
+            Keeps track of wheather debug logging is enabled.
+            </summary>
+        </member>
+        <member name="M:PCR1000.PcrNetworkServer.SetDebugLogger(System.Boolean)">
+            <summary>
+            Enables or disables debug logging in the comminication library.
+            </summary>
+            <param name="debug">Enable or disable.</param>
+        </member>
+        <member name="M:PCR1000.PcrNetworkServer.SerialPortDataReceived(System.Object,System.IO.Ports.SerialDataReceivedEventArgs)">
+            <summary>
+            Method called when data is received from the serial port.
+            </summary>
+            <param name="sender">The serial port that called the method.</param>
+            <param name="e">Event arguments.</param>
+        </member>
+        <member name="T:PCR1000.Annotations.CanBeNullAttribute">
+            <summary>
+            Indicates that the value of the marked element could be <c>null</c> sometimes,
+            so the check for <c>null</c> is necessary before its usage
+            </summary>
+            <example><code>
+            [CanBeNull] public object Test() { return null; }
+            public void UseTest() {
+              var p = Test();
+              var s = p.ToString(); // Warning: Possible 'System.NullReferenceException'
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.NotNullAttribute">
+            <summary>
+            Indicates that the value of the marked element could never be <c>null</c>
+            </summary>
+            <example><code>
+            [NotNull] public object Foo() {
+              return null; // Warning: Possible 'null' assignment
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.StringFormatMethodAttribute">
+            <summary>
+            Indicates that the marked method builds string by format pattern and (optional) arguments.
+            Parameter, which contains format string, should be given in constructor. The format string
+            should be in <see cref="M:System.String.Format(System.IFormatProvider,System.String,System.Object[])"/>-like form
+            </summary>
+            <example><code>
+            [StringFormatMethod("message")]
+            public void ShowError(string message, params object[] args) { /* do something */ }
+            public void Foo() {
+              ShowError("Failed: {0}"); // Warning: Non-existing argument in format string
+            }
+            </code></example>
+        </member>
+        <member name="M:PCR1000.Annotations.StringFormatMethodAttribute.#ctor(System.String)">
+            <param name="formatParameterName">
+            Specifies which parameter of an annotated method should be treated as format-string
+            </param>
+        </member>
+        <member name="T:PCR1000.Annotations.InvokerParameterNameAttribute">
+            <summary>
+            Indicates that the function argument should be string literal and match one
+            of the parameters of the caller function. For example, ReSharper annotates
+            the parameter of <see cref="T:System.ArgumentNullException"/>
+            </summary>
+            <example><code>
+            public void Foo(string param) {
+              if (param == null)
+                throw new ArgumentNullException("par"); // Warning: Cannot resolve symbol
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.NotifyPropertyChangedInvocatorAttribute">
+             <summary>
+             Indicates that the method is contained in a type that implements
+             <see cref="T:System.ComponentModel.INotifyPropertyChanged"/> interface
+             and this method is used to notify that some property value changed
+             </summary>
+             <remarks>
+             The method should be non-static and conform to one of the supported signatures:
+             <list>
+             <item><c>NotifyChanged(string)</c></item>
+             <item><c>NotifyChanged(params string[])</c></item>
+             <item><c>NotifyChanged{T}(Expression{Func{T}})</c></item>
+             <item><c>NotifyChanged{T,U}(Expression{Func{T,U}})</c></item>
+             <item><c>SetProperty{T}(ref T, T, string)</c></item>
+             </list>
+             </remarks>
+             <example><code>
+             public class Foo : INotifyPropertyChanged {
+               public event PropertyChangedEventHandler PropertyChanged;
+               [NotifyPropertyChangedInvocator]
+               protected virtual void NotifyChanged(string propertyName) { ... }
+            
+               private string _name;
+               public string Name {
+                 get { return _name; }
+                 set { _name = value; NotifyChanged("LastName"); /* Warning */ }
+               }
+             }
+             </code>
+             Examples of generated notifications:
+             <list>
+             <item><c>NotifyChanged("Property")</c></item>
+             <item><c>NotifyChanged(() =&gt; Property)</c></item>
+             <item><c>NotifyChanged((VM x) =&gt; x.Property)</c></item>
+             <item><c>SetProperty(ref myField, value, "Property")</c></item>
+             </list>
+             </example>
+        </member>
+        <member name="T:PCR1000.Annotations.ContractAnnotationAttribute">
+            <summary>
+            Describes dependency between method input and output
+            </summary>
+            <syntax>
+            <p>Function Definition Table syntax:</p>
+            <list>
+            <item>FDT      ::= FDTRow [;FDTRow]*</item>
+            <item>FDTRow   ::= Input =&gt; Output | Output &lt;= Input</item>
+            <item>Input    ::= ParameterName: Value [, Input]*</item>
+            <item>Output   ::= [ParameterName: Value]* {halt|stop|void|nothing|Value}</item>
+            <item>Value    ::= true | false | null | notnull | canbenull</item>
+            </list>
+            If method has single input parameter, it's name could be omitted.<br/>
+            Using <c>halt</c> (or <c>void</c>/<c>nothing</c>, which is the same)
+            for method output means that the methos doesn't return normally.<br/>
+            <c>canbenull</c> annotation is only applicable for output parameters.<br/>
+            You can use multiple <c>[ContractAnnotation]</c> for each FDT row,
+            or use single attribute with rows separated by semicolon.<br/>
+            </syntax>
+            <examples><list>
+            <item><code>
+            [ContractAnnotation("=> halt")]
+            public void TerminationMethod()
+            </code></item>
+            <item><code>
+            [ContractAnnotation("halt &lt;= condition: false")]
+            public void Assert(bool condition, string text) // regular assertion method
+            </code></item>
+            <item><code>
+            [ContractAnnotation("s:null => true")]
+            public bool IsNullOrEmpty(string s) // string.IsNullOrEmpty()
+            </code></item>
+            <item><code>
+            // A method that returns null if the parameter is null, and not null if the parameter is not null
+            [ContractAnnotation("null => null; notnull => notnull")]
+            public object Transform(object data) 
+            </code></item>
+            <item><code>
+            [ContractAnnotation("s:null=>false; =>true,result:notnull; =>false, result:null")]
+            public bool TryParse(string s, out Person result)
+            </code></item>
+            </list></examples>
+        </member>
+        <member name="T:PCR1000.Annotations.LocalizationRequiredAttribute">
+            <summary>
+            Indicates that marked element should be localized or not
+            </summary>
+            <example><code>
+            [LocalizationRequiredAttribute(true)]
+            public class Foo {
+              private string str = "my string"; // Warning: Localizable string
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.CannotApplyEqualityOperatorAttribute">
+            <summary>
+            Indicates that the value of the marked type (or its derivatives)
+            cannot be compared using '==' or '!=' operators and <c>Equals()</c>
+            should be used instead. However, using '==' or '!=' for comparison
+            with <c>null</c> is always permitted.
+            </summary>
+            <example><code>
+            [CannotApplyEqualityOperator]
+            class NoEquality { }
+            class UsesNoEquality {
+              public void Test() {
+                var ca1 = new NoEquality();
+                var ca2 = new NoEquality();
+                if (ca1 != null) { // OK
+                  bool condition = ca1 == ca2; // Warning
+                }
+              }
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.BaseTypeRequiredAttribute">
+            <summary>
+            When applied to a target attribute, specifies a requirement for any type marked
+            with the target attribute to implement or inherit specific type or types.
+            </summary>
+            <example><code>
+            [BaseTypeRequired(typeof(IComponent)] // Specify requirement
+            public class ComponentAttribute : Attribute { }
+            [Component] // ComponentAttribute requires implementing IComponent interface
+            public class MyComponent : IComponent { }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.UsedImplicitlyAttribute">
+            <summary>
+            Indicates that the marked symbol is used implicitly
+            (e.g. via reflection, in external library), so this symbol
+            will not be marked as unused (as well as by other usage inspections)
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.MeansImplicitUseAttribute">
+            <summary>
+            Should be used on attributes and causes ReSharper
+            to not mark symbols marked with such attributes as unused
+            (as well as by other usage inspections)
+            </summary>
+        </member>
+        <member name="F:PCR1000.Annotations.ImplicitUseKindFlags.Access">
+            <summary>Only entity marked with attribute considered used</summary>
+        </member>
+        <member name="F:PCR1000.Annotations.ImplicitUseKindFlags.Assign">
+            <summary>Indicates implicit assignment to a member</summary>
+        </member>
+        <member name="F:PCR1000.Annotations.ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature">
+            <summary>
+            Indicates implicit instantiation of a type with fixed constructor signature.
+            That means any unused constructor parameters won't be reported as such.
+            </summary>
+        </member>
+        <member name="F:PCR1000.Annotations.ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature">
+            <summary>Indicates implicit instantiation of a type</summary>
+        </member>
+        <member name="T:PCR1000.Annotations.ImplicitUseTargetFlags">
+            <summary>
+            Specify what is considered used implicitly
+            when marked with <see cref="T:PCR1000.Annotations.MeansImplicitUseAttribute"/>
+            or <see cref="T:PCR1000.Annotations.UsedImplicitlyAttribute"/>
+            </summary>
+        </member>
+        <member name="F:PCR1000.Annotations.ImplicitUseTargetFlags.Members">
+            <summary>Members of entity marked with attribute are considered used</summary>
+        </member>
+        <member name="F:PCR1000.Annotations.ImplicitUseTargetFlags.WithMembers">
+            <summary>Entity marked with attribute and all its members considered used</summary>
+        </member>
+        <member name="T:PCR1000.Annotations.PublicAPIAttribute">
+            <summary>
+            This attribute is intended to mark publicly available API
+            which should not be removed and so is treated as used
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.InstantHandleAttribute">
+            <summary>
+            Tells code analysis engine if the parameter is completely handled
+            when the invoked method is on stack. If the parameter is a delegate,
+            indicates that delegate is executed while the method is executed.
+            If the parameter is an enumerable, indicates that it is enumerated
+            while the method is executed
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.PureAttribute">
+            <summary>
+            Indicates that a method does not make any observable state changes.
+            The same as <c>System.Diagnostics.Contracts.PureAttribute</c>
+            </summary>
+            <example><code>
+            [Pure] private int Multiply(int x, int y) { return x * y; }
+            public void Foo() {
+              const int a = 2, b = 2;
+              Multiply(a, b); // Waring: Return value of pure method is not used
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.PathReferenceAttribute">
+            <summary>
+            Indicates that a parameter is a path to a file or a folder
+            within a web project. Path can be relative or absolute,
+            starting from web root (~)
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcActionAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter
+            is an MVC action. If applied to a method, the MVC action name is calculated
+            implicitly from the context. Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.ChildActionExtensions.RenderAction(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcAreaAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC area.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.ChildActionExtensions.RenderAction(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcControllerAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that
+            the parameter is an MVC controller. If applied to a method,
+            the MVC controller name is calculated implicitly from the context.
+            Use this attribute for custom wrappers similar to 
+            <c>System.Web.Mvc.Html.ChildActionExtensions.RenderAction(HtmlHelper, String, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcMasterAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC Master.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Controller.View(String, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcModelTypeAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC model type.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Controller.View(String, Object)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcPartialViewAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that
+            the parameter is an MVC partial view. If applied to a method,
+            the MVC partial view name is calculated implicitly from the context.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.RenderPartialExtensions.RenderPartial(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcSupressViewErrorAttribute">
+            <summary>
+            ASP.NET MVC attribute. Allows disabling all inspections
+            for MVC views within a class or a method.
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcDisplayTemplateAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC display template.
+            Use this attribute for custom wrappers similar to 
+            <c>System.Web.Mvc.Html.DisplayExtensions.DisplayForModel(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcEditorTemplateAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC editor template.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.EditorExtensions.EditorForModel(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcTemplateAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC template.
+            Use this attribute for custom wrappers similar to
+            <c>System.ComponentModel.DataAnnotations.UIHintAttribute(System.String)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcViewAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter
+            is an MVC view. If applied to a method, the MVC view name is calculated implicitly
+            from the context. Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Controller.View(Object)</c>
+            </summary>
+        </member>
+        <member name="T:PCR1000.Annotations.AspMvcActionSelectorAttribute">
+            <summary>
+            ASP.NET MVC attribute. When applied to a parameter of an attribute,
+            indicates that this parameter is an MVC action name
+            </summary>
+            <example><code>
+            [ActionName("Foo")]
+            public ActionResult Login(string returnUrl) {
+              ViewBag.ReturnUrl = Url.Action("Foo"); // OK
+              return RedirectToAction("Bar"); // Error: Cannot resolve action
+            }
+            </code></example>
+        </member>
+        <member name="T:PCR1000.Annotations.RazorSectionAttribute">
+            <summary>
+            Razor attribute. Indicates that a parameter or a method is a Razor section.
+            Use this attribute for custom wrappers similar to 
+            <c>System.Web.WebPages.WebPageBase.RenderSection(String)</c>
+            </summary>
+        </member>
+    </members>
+</doc>
