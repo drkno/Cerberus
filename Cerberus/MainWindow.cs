@@ -34,11 +34,11 @@ namespace Cerberus
                             EMessageBox.ShowDialog("Invalid Host/Port Provided. Quitting...", "Startup Error");
                             Environment.Exit(-1);
                         }
-                        PcrController = new PcrControl(int.Parse(split[1]), split[0]);
+                        PcrController = new PcrControl(new PcrNetworkClient(split[0], int.Parse(split[1])));
                     }
                     else
                     {
-                        PcrController = new PcrControl(port);
+                        PcrController = new PcrControl(new PcrSerialComm(port));
                     }
                     PcrController.SetComDebugLogging(true);
                 }
