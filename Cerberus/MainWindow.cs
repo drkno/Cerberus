@@ -11,7 +11,7 @@ namespace Cerberus
     public partial class MainWindow : Form
     {
         protected PcrControl PcrController;
-        private Thread evenThread;
+        private readonly Thread _evenThread;
 
         public MainWindow()
         {
@@ -26,6 +26,7 @@ namespace Cerberus
                 }
                 else
                 {
+                    IComm comm;
                     if (port.Contains(":"))
                     {
                         var split = port.Split(':');
@@ -34,12 +35,18 @@ namespace Cerberus
                             EMessageBox.ShowDialog("Invalid Host/Port Provided. Quitting...", "Startup Error");
                             Environment.Exit(-1);
                         }
-                        PcrController = new PcrControl(new PcrNetworkClient(split[0], int.Parse(split[1])));
+                        comm = new PcrNetworkClient(split[0], int.Parse(split[1]));
+                        if (!comm.PcrOpen())
+                        {
+                            EMessageBox.ShowDialog("Network connection failed.", "Startup Error");
+                            Environment.Exit(-1);
+                        }
                     }
                     else
                     {
-                        PcrController = new PcrControl(new PcrSerialComm(port));
+                        comm = new PcrSerialComm(port);
                     }
+                    PcrController = new PcrControl(comm);
                     PcrController.SetComDebugLogging(true);
                 }
             }
@@ -56,14 +63,14 @@ namespace Cerberus
             comboBoxFilter.SelectedIndex = 0;
             comboBoxTS.SelectedIndex = 0;
             comboBoxNb.SelectedIndex = 0;
-            evenThread = new Thread(EventThreadHandler);
+            _evenThread = new Thread(EventThreadHandler);
         }
 
         private void EventThreadHandler()
         {
             try
             {
-                while (evenThread.ThreadState != ThreadState.AbortRequested)
+                while (_evenThread.ThreadState != ThreadState.AbortRequested)
                 {
                     var value = (float)PcrController.PcrSigStrength();
                     value /= 255.0f;
@@ -149,7 +156,7 @@ namespace Cerberus
             {
                 if (PcrController.PcrIsOn())
                 {
-                    evenThread.Abort();
+                    _evenThread.Abort();
                     if (!PcrController.PcrPowerDown())
                     {
                         throw new Exception("Power Down Failed");
@@ -163,7 +170,7 @@ namespace Cerberus
                         throw new Exception("Power Up Failed");
                     }
                     powerButton.SwitchPower();
-                    evenThread.Start();
+                    _evenThread.Start();
                     var scrollEventArgs = new ScrollEventArgs(ScrollEventType.SmallIncrement, hScrollBarSquelch.Value);
                     HScrollBarSquelchScroll(null, scrollEventArgs);
                     scrollEventArgs = new ScrollEventArgs(ScrollEventType.SmallIncrement, hScrollBarAfGain.Value);
