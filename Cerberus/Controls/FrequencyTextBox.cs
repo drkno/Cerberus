@@ -23,6 +23,7 @@ namespace Cerberus
             Text = temp;
             sel -= TextLength/4;
             sell -= sell/4;
+            if (sel < 0) return;
             SelectionStart = sel;
             SelectionLength = sell;
         }
