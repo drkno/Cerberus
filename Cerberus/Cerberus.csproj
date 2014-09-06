@@ -56,6 +56,15 @@
     <Compile Include="ComSelection.Designer.cs">
       <DependentUpon>ComSelection.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\FrequencyTextBoxMod.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\FrequencyTextBoxArea.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\FrequencyTextBoxArea.Designer.cs">
+      <DependentUpon>FrequencyTextBoxArea.cs</DependentUpon>
+    </Compile>
     <Compile Include="EMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -99,6 +108,9 @@
     <Compile Include="SatPasses\WxTrackImporter.cs" />
     <EmbeddedResource Include="ComSelection.resx">
       <DependentUpon>ComSelection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FrequencyTextBoxArea.resx">
+      <DependentUpon>FrequencyTextBoxArea.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EMessageBox.resx">
       <DependentUpon>EMessageBox.cs</DependentUpon>
