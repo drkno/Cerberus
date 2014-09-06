@@ -11,7 +11,7 @@ namespace Cerberus
     public partial class MainWindow : Form
     {
         protected PcrControl PcrController;
-        private readonly Thread _evenThread;
+        private Thread _evenThread;
 
         public MainWindow()
         {
@@ -157,6 +157,8 @@ namespace Cerberus
                 if (PcrController.PcrIsOn())
                 {
                     _evenThread.Abort();
+                    _evenThread.Join();
+                    _evenThread = new Thread(EventThreadHandler);
                     if (!PcrController.PcrPowerDown())
                     {
                         throw new Exception("Power Down Failed");
