@@ -1,0 +1,146 @@
+    <div class="container-fluid" style="text-align: center">
+      <div class="row">
+        <div id="tunerlcd" class="lcd ui-corner-all" style="display: inline-block">
+  				<div style="position:absolute; left: 35px; top: 15px;">
+  					<span>PCR1000</span>
+  				</div>
+
+          <div class="lcdButtonLeft" style="bottom: 35px;" ng-click="toggleMute()">
+            <span class="glyphicon" ng-class="{'glyphicon-volume-off':muted,'glyphicon-volume-up':!muted}"></span>
+          </div>
+
+          <div class="lcdButtonLeft"
+            ng-class="{powerOn:powerOn,powerOff:!powerOn}" ng-click="togglePower()">
+            <span class="glyphicon glyphicon-off"></span>
+          </div>
+  				<div class="display">
+  					<canvas id="lcdFrequency" width="400" height="64" class="buttonCursor"></canvas>
+  					<span>MHz</span>
+  				</div>
+  			</div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-9" style="display:inline-block;float:none">
+          <table class="table table-responsive table-condensed table-striped">
+            <tr>
+              <td></td>
+              <th style="text-align: right">
+                <label for="powerToggle">Power</label>
+              </th>
+              <td style="text-align: left">
+                <toggle id="powerToggle" ng-model="powerOn" on="On" off="Off" onstyle="btn-success" offstyle="btn-danger"></toggle>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <th>
+                <label for="modeOpt">Mode</label>
+              </th>
+              <td>
+                <select class="form-control" id="modeOpt" ng-disabled="!powerOn">
+                  <option ng-repeat="opt in modeOptions" value="opt">
+                    {{opt}}
+                  </option>
+                </select>
+              </td>
+
+              <th>
+                <label for="afgainSlider">AF Gain</label>
+              </th>
+              <td>
+                <slider id="afgainSlider" ng-disabled="!powerOn" ng-model="value" min="0" step="1" max="100" value="50"></slider>
+              </td>
+            </tr>
+
+            <tr>
+              <th>
+                <label for="filterOpt">Filter</label>
+              </th>
+              <td>
+                <select class="form-control" id="filterOpt" ng-disabled="!powerOn">
+                  <option ng-repeat="opt in filterOptions" value="opt">
+                    {{opt}}
+                  </option>
+                </select>
+              </td>
+
+              <th>
+                <label for="squelchSlider">Squelch</label>
+              </th>
+              <td>
+                <slider id="squelchSlider" ng-disabled="!powerOn" ng-model="value" min="0" step="1" max="100" value="50"></slider>
+              </td>
+            </tr>
+
+            <tr>
+              <th>
+                <label for="toneSqOpt">Tone Squelch</label>
+              </th>
+              <td>
+                <select class="form-control" ng-disabled="!powerOn" id="toneSqOpt">
+                  <option ng-repeat="opt in toneSquelchOptions" value="opt">
+                    {{opt}}
+                  </option>
+                </select>
+              </td>
+
+              <th>
+                <label style="display:inline-block;vertical-align:middle;float:none" for="nbToggle">Noise Blank</label>
+              </th>
+              <td>
+                <toggle id="nbToggle" ng-disabled="!powerOn" ng-model="noiseBlank" on="Enabled" off="Disabled" onstyle="btn-primary"></toggle>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div justgage
+               title="Signal (%)" title-font-color="dimgray" title-position="below"
+               title-min-font-size="8px" value="{{value}}" value-font-color="black"
+               value-min-font-size="15px" human-friendly="true"
+               human-friendly-decimal="true" decimals="1" style="width:400px; display: inline-block"></div>
+        </div>
+
+        <div class="col-md-6">
+          <div justgage
+               title="Signal (%)" title-font-color="dimgray" title-position="below"
+               title-min-font-size="8px" value="{{value}}" value-font-color="black"
+               value-min-font-size="15px" human-friendly="true"
+               human-friendly-decimal="true" decimals="1" style="width:400px; display: inline-block"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:none">
+      <audio id="radioAudio" src="http://192.168.1.9:8000/PCR1000" autoplay="autoplay">
+    </div>
+
+    <script type="text/javascript">
+    var lcdOn = $('<div class="lcdOn"></div>').css("color");
+    var lcdOff = $('<div class="lcdOff"></div>').css("color");
+    var lcdBg = $(".lcd").css("background-color");
+
+  	// LCD for frequency display
+  	var lcdFrequency = new SegmentDisplay("lcdFrequency");
+  	lcdFrequency.pattern = "###.###.###.###";
+  	lcdFrequency.intMin = 0;
+  	lcdFrequency.intMax = 999999999999;
+  	lcdFrequency.colorOn = lcdOn;
+  	lcdFrequency.colorOff = lcdOff;
+
+  	lcdFrequency.onValueChanged = function(value) {
+  		var hz = value * 10;
+
+  		console.debug("new frequency = " + hz + "Hz");
+  	};
+
+  	$(document).ready(function() {
+  		lcdFrequency.setIntValue(10000000);
+  		lcdFrequency.enableMouse();
+  	});
+    </script>

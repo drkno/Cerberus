@@ -1,6 +1,7 @@
-﻿var module = angular.module('wudhaghControllers');
-module.controller('TemplateController', ['$scope', '$location',
+cerberusControllers.controller('TemplateController', ['$scope', '$location',
     function ($scope, $location) {
+        $scope.appName = AppName;
+
         $scope.getRoutes = function() {
             return routes;
         }
