@@ -1,14 +1,18 @@
-﻿var fs = require('fs'),
+'use strict';
+
+﻿let fs = require('fs'),
     path = require('path'),
     mime = require('mime'),
 	url = require('url');
 
-exports.dir = function (htmlRoot) {
-    for (var key in htmlRoot) {
-        htmlRoot[key] = path.resolve(path.join(__dirname, htmlRoot[key]));
+exports.dir = (htmlRoot) => {
+    for (let key in htmlRoot) {
+        if (htmlRoot.hasOwnProperty(key)) {
+            htmlRoot[key] = path.resolve(path.join(__dirname, htmlRoot[key]));
+        }
     }
 
-    return function(req, res, next) {
+    return (req, res, next) => {
         res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
         res.header('Expires', '-1');
         res.header('Pragma', 'no-cache');
@@ -16,16 +20,16 @@ exports.dir = function (htmlRoot) {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
-		var p = url.parse(req.url).path;
+		let p = url.parse(req.url).path;
         if (p.indexOf("/api") < 0) {
             if (p === "/") {
                 p = "/index.html";
             }
 
-            var found = false;
-            var file = null;
-            for (var key in htmlRoot) {
-                if (p.startsWith(key)) {
+            let found = false,
+                file = null;
+            for (let key in htmlRoot) {
+                if (htmlRoot.hasOwnProperty(key) && p.startsWith(key)) {
                     file = path.join(htmlRoot[key], p.substring(key.length));
                     file = path.resolve(file);
                     if (file.startsWith(htmlRoot[key])) {
@@ -41,7 +45,7 @@ exports.dir = function (htmlRoot) {
                 return;
             }
 
-            var type = mime.lookup(file);
+            let type = mime.lookup(file);
             fs.readFile(file, function(err, data) {
                 if (err) {
                     fs.readFile(path.join(htmlRoot[''], '404.html'), function(err, data) {

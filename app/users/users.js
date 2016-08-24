@@ -1,23 +1,34 @@
-﻿var sha512 = require('sha512');
+'use strict';
 
-var UserManager = function (usersFile, alg) {
-    if (!usersFile) {
-        usersFile = "../../users.json";
+﻿module.exports = class {
+    constructor (usersFile, alg) {
+        if (!usersFile) {
+            usersFile = "../../users.json";
+        }
+        try {
+            this.users = require(usersFile);
+        }
+        catch (e) {
+            this.users = [];
+        }
+
+        if (!alg) {
+            alg = 'sha512';
+        }
+        this.alg = require(alg);
     }
-    this.users = require(usersFile);
 
-    if (!alg) {
-        alg = 'sha512';
+    validateUser (username, password) {
+        password = this.alg(password).toString('hex');
+        let f = this.users.filter((user) => {
+            return user.username === username && user.password === password;
+        });
+        return f.length === 1;
     }
-    this.alg = require(alg);
-};
 
-UserManager.prototype.validateUser = function(username, password) {
-    password = this.alg(password).toString('hex');
-    var f = this.users.filter(function (user) {
-        return user.username === username && user.password === password;
-    });
-    return f.length > 0;
+    getUserList() {
+        return this.users.map((user) => {
+            return user.username;
+        });
+    }
 };
-
-module.exports = UserManager;
