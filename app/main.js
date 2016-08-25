@@ -1,8 +1,10 @@
 'use strict';
 
 let Server = require('./server/serve.js'),
-    ListManager = require('./list.js'),
     UserManager = require('./users/users.js'),
+    PcrControl = require('./pcr/PcrControl.js'),
+    PcrDef = require('./pcr/PcrDef.js'),
+    PcrNetworkClient = require('./pcr/PcrNetworkComm.js'),
     fs = require('fs'),
     path = require('path');
 
@@ -12,9 +14,15 @@ let setupServer = (config) => {
     return new Server(config.port, config.htmlRoot, eventsRoot, userManager, config.authentication);
 };
 
+let setupRadio = (config) => {
+    let comm = new PcrNetworkClient(),
+        control = new PcrControl(comm);
+    return control;
+};
+
 exports.run = (config) => {
     let server = setupServer(config),
-        manager = new ListManager(config.datastore),
+        control = setupRadio(config),
         settings = {
             power: false,
             mode: 'AM',
