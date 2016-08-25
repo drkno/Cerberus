@@ -6,7 +6,7 @@ let Server = require('./server/serve.js'),
 
 let setupServer = (config) => {
     let userManager = new UserManager(config.usersFile, config.passwordAlgorithm),
-        eventsRoot = config.eventsRoot ? config.eventsRoot : '/wudhagh-ws-events';
+        eventsRoot = config.eventsRoot ? config.eventsRoot : '/cerberus-ws-events';
     return new Server(config.port, config.htmlRoot, eventsRoot, userManager, config.authentication);
 };
 
