@@ -1,5 +1,5 @@
 cerberusControllers.controller('RadioController', [
-    '$scope', '$http', '$filter', function ($scope, $http, $filter) {
+    '$scope', '$http', 'socket', function ($scope, $http, socket) {
 
       $scope.value = 25.34;
       $scope.sliderValue = 0;
