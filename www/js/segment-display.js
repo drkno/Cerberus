@@ -119,9 +119,6 @@ SegmentDisplay.prototype.enableMouse = function() {
   (function(p) {
     display.addEventListener("mousewheel", function (event) { p.onMouseEvent(event); });
     display.addEventListener("mousedown", function (event) { p.onMouseEvent(event); });
-//    display.addEventListener("touchstart", function (event) { p.onMouseEvent(event); });
-//    display.addEventListener("touchmove", function (event) { p.onMouseEvent(event); });
-//    display.addEventListener("touchend", function (event) { p.onMouseEvent(event); });
   }) (this);
 }
 

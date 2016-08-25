@@ -14,45 +14,20 @@ let setupServer = (config) => {
 
 exports.run = (config) => {
     let server = setupServer(config),
-        manager = new ListManager(config.datastore);
+        manager = new ListManager(config.datastore),
+        settings = {
+            power: false,
+            mode: 'AM',
+            filter: '3k',
+            toneSquelch: 'Off',
+            afGain: 50,
+            squelch: 50,
+            noiseBlank: false,
+            frequency: 10000000
+        };
 
-    let currResponse = (socket) => {
-        manager.current((obj) => {
-            socket.emit('current', obj);
-        });
-    };
-    server.on('connection', currResponse);
-    server.on('refresh', currResponse);
-
-    server.on('new', (socket) => {
-        manager.newList();
-        socket.broadcast.emit('new');
-    });
-
-    server.on('add', (socket, data) => {
-        manager.addItem(data);
-        socket.broadcast.emit('add', data);
-    });
-    
-    server.on('remove', (socket, data) => {
-        manager.removeItem(data);
-        socket.broadcast.emit('remove', data);
-    });
-    
-    server.on('update', (socket, data) => {
-        manager.replaceItem(data.oldName, data.item);
-        socket.broadcast.emit('update', data);
-    });
-    
-    server.apiGet('suggestions', (req, res) => {
-        manager.getItems((obj) => {
-            res.send(obj);
-        });
-    });
-    
-    server.on('swipe', (socket, data) => {
-        manager.updateFields(data.name, { purchased: data.purchased });
-        socket.broadcast.emit('swipe', data);
+    server.on('current', (socket) => {
+        socket.emit('current', settings);
     });
 
     server.apiGet('images', (req, res) => {
@@ -86,6 +61,22 @@ exports.run = (config) => {
             res.send({ success: true, images: resData });
         });
     });
+
+    let settingsUpdate = (type) => {
+        server.on(type, (socket, data) => {
+            settings[type] = data[type];
+            socket.broadcast.emit(type, data);
+        });
+    };
+
+    settingsUpdate('power');
+    settingsUpdate('mode');
+    settingsUpdate('afGain');
+    settingsUpdate('filter');
+    settingsUpdate('squelch');
+    settingsUpdate('toneSquelch');
+    settingsUpdate('noiseBlank');
+    settingsUpdate('frequency');
 
 	server.start();
 };
