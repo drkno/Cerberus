@@ -3,10 +3,10 @@
 let Server = require('./server/serve.js'),
     UserManager = require('./users/users.js'),
     PcrControl = require('./pcr/PcrControl.js'),
-    PcrDef = require('./pcr/PcrDef.js'),
     PcrNetworkClient = require('./pcr/PcrNetworkComm.js'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    blankCallback = () => {};
 
 let setupServer = (config) => {
     let userManager = new UserManager(config.usersFile, config.passwordAlgorithm),
@@ -14,15 +14,32 @@ let setupServer = (config) => {
     return new Server(config.port, config.htmlRoot, eventsRoot, userManager, config.authentication);
 };
 
-let setupRadio = (config) => {
+let initialise = (control, settings) => {
+    if (settings.power) {
+        control.PcrPowerUp(blankCallback);
+    }
+    else {
+        control.PcrPowerDown(blankCallback);
+    }
+    control.PcrSetMode(settings.mode, blankCallback);
+    control.PcrSetVolume(settings.afGain, blankCallback);
+    control.PcrSetFilterN(parseInt(settings.filter.substr(0, settings.filter.indexOf('k'))), blankCallback);
+    control.PcrSetSquelch(settings.squelch, blankCallback);
+    control.PcrSetToneSqN(parseFloat(settings.toneSquelch.substr(0, settings.toneSquelch.indexOf(' '))), blankCallback);
+    control.PcrSetNb(settings.noiseBlank, blankCallback);
+    control.PcrSetFreq(settings.frequency, blankCallback);
+};
+
+let setupRadio = (config, settings) => {
     let comm = new PcrNetworkClient('192.168.1.9', 4456),
-        control = new PcrControl(comm);
+        control = new PcrControl(comm, () => {
+            initialise(control, settings);
+        });
     return control;
 };
 
 exports.run = (config) => {
     let server = setupServer(config),
-        control = setupRadio(config),
         settings = {
             power: false,
             mode: 'AM',
@@ -32,7 +49,9 @@ exports.run = (config) => {
             squelch: 50,
             noiseBlank: false,
             frequency: 10000000
-        };
+        },
+        control = setupRadio(config, settings);
+        
 
     server.on('current', (socket) => {
         socket.emit('current', settings);
@@ -78,17 +97,23 @@ exports.run = (config) => {
         });
     };
 
-    let blankCallback = () => {};
-
     settingsUpdate('power', (val) => {
-        val ? control.PcrPowerUp(blankCallback) : control.PcrPowerDown(blankCallback);
+        if (val) {
+            initialise(control, settings);
+        }
+        else {
+            control.PcrPowerDown(blankCallback);
+        }
     });
+
     settingsUpdate('mode', (val) => {
         control.PcrSetMode(val, blankCallback);
     });
+
     settingsUpdate('afGain', (val) => {
         control.PcrSetVolume(val, blankCallback);
     });
+
     settingsUpdate('filter', (val) => {
         let value = 0;
         if (val.indexOf('k')) {
@@ -96,22 +121,38 @@ exports.run = (config) => {
         }
         control.PcrSetFilterN(value, blankCallback);
     });
+
     settingsUpdate('squelch', (val) => {
         control.PcrSetSquelch(val, blankCallback);
     });
+
     settingsUpdate('toneSquelch', (val) => {
         let value = 0;
         if (val.indexOf('Hz')) {
-            value = parseInt((parseFloat(val.substr(0, val.indexOf(' '))) * 10).toString());
+            value = parseFloat(val.substr(0, val.indexOf(' ')));
         }
         control.PcrSetToneSqN(value, blankCallback);
     });
+
     settingsUpdate('noiseBlank', (val) => {
         control.PcrSetNb(val, blankCallback);
     });
+
     settingsUpdate('frequency', (val) => {
         control.PcrSetFreq(val, blankCallback);
     });
+
+    setInterval(() => {
+        if (settings.power) {
+            control.PcrSigStrength((strength) => {
+                let s = strength / 255.0;
+                server.emit('signal', { signal: s });
+            });
+        }
+        else {
+            server.emit('signal', { signal: 0 });
+        }
+    }, 1000);
 
 	server.start();
 };

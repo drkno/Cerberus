@@ -11,6 +11,8 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
         frequency: 10000000
       };
 
+      $scope.signalStrength = 0;  
+
       //#region power
       $scope.power = $scope.settings.power;
       $scope.togglePower = () => {
@@ -197,10 +199,16 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
       $scope.muted = false;
 
       $scope.toggleMute = () => {
-        $scope.muted = !$scope.muted;
-        angular.element("#radioAudio").prop("muted",$scope.muted);
+          $scope.muted = !$scope.muted;
+          angular.element("#radioAudio").prop("muted",$scope.muted);
       };
       //#endregion
-      
+
+      //#region signal
+      socket.on('signal', (data) => {
+          $scope.signalStrength = (data.signal * 100.0).toFixed();
+      });
+      //#endregion
+
     }
 ]);

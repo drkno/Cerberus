@@ -110,7 +110,11 @@ module.exports = class PcrControl
 
     // http://stackoverflow.com/questions/12291755/how-to-convert-dec-to-hex-in-javascript
     toHex(dec) {
-        return (+dec).toString(16).toUpperCase();
+        let hex = (+dec).toString(16).toUpperCase();
+        if (hex.length === 1) {
+            hex = '0' + hex;
+        }
+        return hex;
     }
 
     /// <summary>
@@ -639,7 +643,8 @@ module.exports = class PcrControl
         if ((PcrDef.LOWERFRQ <= freq) && (freq <= PcrDef.UPPERFRQ)) {
             var freqConv = this.padDigits(freq, 10);
             var temp = PcrDef.PCRFRQ + freqConv + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
-            this._pcrComm.SendWait(temp, (resp) => {
+            this._pcrComm.SendWait(temp,
+            (resp) => {
                 if (this.PcrCheckResponse(resp)) {
                     this._pcrRadio.PcrFreq = freq;
                     Debug.WriteLine("PcrControl PcrSetFreq - Success");
@@ -648,6 +653,9 @@ module.exports = class PcrControl
                 Debug.WriteLine("PcrControl PcrSetFreq - Failed");
                 return callback(false);
             });
+        }
+        else {
+            throw new Error('Value out of allowed range.');
         }
     }
         
@@ -785,7 +793,7 @@ module.exports = class PcrControl
             callback(false);
             return;
         }
-        squelch = parseInt((256.0 / 100.0) * squelch);
+        squelch = parseInt((255.0 / 100.0) * (+squelch));
         var temp = PcrDef.PCRSQL + this.toHex(squelch);
         this._pcrComm.SendWait(temp, (response) => {
             if (!this.PcrCheckResponse(response)) return callback(false);
@@ -966,7 +974,7 @@ module.exports = class PcrControl
             callback(false);
             return;
         }
-        volume = parseInt((256.0 / 100.0) * volume);
+        volume = parseInt((255.0 / 100.0) * (+volume));
         var temp = PcrDef.PCRVOL + this.toHex(volume);
     
         this._pcrComm.SendWait(temp, (response) => {
@@ -983,24 +991,9 @@ module.exports = class PcrControl
     PcrSigStrength(callback)
     {
         Debug.WriteLine("PcrControl PcrSigStrength");
-        this._pcrComm.SendWait(PcrDef.PCRQRST, (temp) => {
-            let sigstr;
+        this._pcrComm.SendWait(PcrDef.PCRQRST, (temp) => { 
             if (temp === "") return callback(0);
-            var digit = temp[2];
-            if ((digit >= 'A') && (digit <= 'F')) {
-                sigstr = (digit - 'A' + 1) * 16;
-            }
-            else {
-                sigstr = parseInt(digit + '') * 16;
-            }
-            
-            digit = temp[3];
-            if ((digit >= 'A') && (digit <= 'F')) {
-                sigstr += digit - 'A' + 1;
-            }
-            else {
-                sigstr += parseInt(digit + '');
-            }
+            let sigstr = parseInt(temp.substr(2), 16);
             return callback(sigstr);
         });
     }
