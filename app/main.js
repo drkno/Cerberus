@@ -70,15 +70,22 @@ exports.run = (config) => {
         });
     });
 
-    let settingsUpdate = (type) => {
+    let settingsUpdate = (type, control) => {
         server.on(type, (socket, data) => {
             settings[type] = data[type];
             socket.broadcast.emit(type, data);
+            control(data[type]);
         });
     };
 
-    settingsUpdate('power');
-    settingsUpdate('mode');
+    let blankCallback = () => {};
+
+    settingsUpdate('power', (val) => {
+        val ? control.PcrPowerUp(blankCallback) : control.PcrPowerDown(blankCallback);
+    });
+    settingsUpdate('mode', (val) => {
+        control.PcrSetMode(val, blankCallback);
+    });
     settingsUpdate('afGain');
     settingsUpdate('filter');
     settingsUpdate('squelch');

@@ -14,7 +14,7 @@
 /// <summary>
 /// Class containing PCR1000 commands.
 /// </summary>
-let PcrDef = module.exports = class {};
+let PcrDef = module.exports = {};
 
 /*
 This is the PCR-1000 Command Set define file. Basically this file
@@ -25,11 +25,11 @@ the radio.
 /// <summary>
 /// Suffix for Radio Query
 /// </summary>
-PcrDef.prototype.PCRQST = "\\?";
+PcrDef.PCRQST = "\\?";
 /// <summary>
 /// Suffix for execute command 
 /// </summary>
-PcrDef.prototype.PCRECMD = "\r\n";
+PcrDef.PCRECMD = "\r\n";
 
 /// <summary>
 /// Init, manual probe 
@@ -41,7 +41,7 @@ PcrDef.prototype.PCRECMD = "\r\n";
 ///      the state as it was before .
 /// \sa PCRINITA
 /// </summary>
-PcrDef.prototype.PCRINITM = "H101\r\nG300\r\n"; 
+PcrDef.PCRINITM = "H101\r\nG300\r\n"; 
 /// <summary>
 /// Init, Auto probe
 /// \b Warning: after issueing an init DO NOT
@@ -52,478 +52,478 @@ PcrDef.prototype.PCRINITM = "H101\r\nG300\r\n";
 ///      the state as it was before .
 /// \sa PCRINITM
 /// </summary>
-PcrDef.prototype.PCRINITA = "H101\r\nG301\r\n";
+PcrDef.PCRINITA = "H101\r\nG301\r\n";
 /// <summary>
 /// Signal Update (G3)
 /// </summary>
-PcrDef.prototype.PCRSIG = "G3";
+PcrDef.PCRSIG = "G3";
 /// <summary>
 /// Program should poll status from radio (G300)
 /// </summary>
-PcrDef.prototype.PCRSIGOFF = "G300";
+PcrDef.PCRSIGOFF = "G300";
 /// <summary>
 /// Radio sends status automagically when a change (G301)
 /// </summary>
-PcrDef.prototype.PCRSIGON	= "G301";
+PcrDef.PCRSIGON	= "G301";
 /// <summary>
 /// Binary mode off (G302)
 /// </summary>
-PcrDef.prototype.PCRSIGBOFF = "G302";
+PcrDef.PCRSIGBOFF = "G302";
 /// <summary>
 /// Binary mode on  (G303)
 /// </summary>
-PcrDef.prototype.PCRSIGBON = "G303";
+PcrDef.PCRSIGBON = "G303";
 
 /// <summary>
 /// Power (H1)
 /// </summary>
-PcrDef.prototype.PCRPWR = "H1";
+PcrDef.PCRPWR = "H1";
 /// <summary>
 /// Power radio down (H100)
 /// </summary>
-PcrDef.prototype.PCRPWROFF = "H100";
+PcrDef.PCRPWROFF = "H100";
 /// <summary>
 /// Power radio up   (H101)
 /// </summary>
-PcrDef.prototype.PCRPWRON = "H101";
+PcrDef.PCRPWRON = "H101";
 /// <summary>
 /// Radio power query
 /// </summary>
-PcrDef.prototype.PCRPWRQRY = "H10?";
+PcrDef.PCRPWRQRY = "H10?";
 
 /// <summary>
 /// Volume prefix (J40) 
 /// </summary>
-PcrDef.prototype.PCRVOL = "J40";
+PcrDef.PCRVOL = "J40";
 /// <summary>
 /// Volume at 75 % (J4075)
 /// </summary>
-PcrDef.prototype.PCRVOLON = "J4075";
+PcrDef.PCRVOLON = "J4075";
 /// <summary>
 /// Volume at MUTE (J4000)
 /// </summary>
-PcrDef.prototype.PCRVOLOFF = "J4000";
+PcrDef.PCRVOLOFF = "J4000";
 
 /// <summary>
 /// Squelch Prefix (J41) 
 /// </summary>
-PcrDef.prototype.PCRSQL = "J41";
+PcrDef.PCRSQL = "J41";
 /// <summary>
 /// Fully Open (J4100) 
 /// </summary>
-PcrDef.prototype.PCRSQLO = "J4100";
+PcrDef.PCRSQLO = "J4100";
 /// <summary>
 /// Closed squelch at 45% (J4145) 
 /// </summary>
-PcrDef.prototype.PCRSQLC = "J4145";
+PcrDef.PCRSQLC = "J4145";
 
 /// <summary>
 /// IF Shift Prefix (J43) 
 /// </summary>
-PcrDef.prototype.PCRIF = "J43";
+PcrDef.PCRIF = "J43";
 /// <summary>
 /// IF Centered (J4380)
 /// </summary>
-PcrDef.prototype.PCRIFC = "J4380";
+PcrDef.PCRIFC = "J4380";
 
 /// <summary>
 /// Automatic Gain Control Prefix (J45) 
 /// </summary>
-PcrDef.prototype.PCRAGC = "J45";
+PcrDef.PCRAGC = "J45";
 /// <summary>
 /// AGC Off (J4500) 
 /// </summary>
-PcrDef.prototype.PCRAGCOFF = "J4500";
+PcrDef.PCRAGCOFF = "J4500";
 /// <summary>
 /// AGC On  (J4501) 
 /// </summary>
-PcrDef.prototype.PCRAGCON = "J4501";
+PcrDef.PCRAGCON = "J4501";
 
 /// <summary>
 /// Noise Blanking Prefix (J46) 
 /// </summary>
-PcrDef.prototype.PCRNB = "J46";
+PcrDef.PCRNB = "J46";
 /// <summary>
 /// Noise Blanking Off (J4600) 
 /// </summary>
-PcrDef.prototype.PCRNBOFF = "J4600";
+PcrDef.PCRNBOFF = "J4600";
 /// <summary>
 /// Noise Blanking On  (J4601) 
 /// </summary>
-PcrDef.prototype.PCRNBON = "J4601";
+PcrDef.PCRNBON = "J4601";
 
 /// <summary>
 /// RF Attenuator Prefix 
 /// </summary>
-PcrDef.prototype.PCRRFA = "J47";
+PcrDef.PCRRFA = "J47";
 /// <summary>
 /// RF Attenuator Off (J4700) 
 /// </summary>
-PcrDef.prototype.PCRRFAOFF = "J4700";
+PcrDef.PCRRFAOFF = "J4700";
 /// <summary>
 /// RF Attenuator On (J4701) 
 /// </summary>
-PcrDef.prototype.PCRRFAON = "J4701";
+PcrDef.PCRRFAON = "J4701";
 
 /// <summary>
 /// VSC Prefix (J50) 
 /// </summary>
-PcrDef.prototype.PCRVSC = "J50";
+PcrDef.PCRVSC = "J50";
 /// <summary>
 /// VSC Off (J5000) 
 /// </summary>
-PcrDef.prototype.PCRVSCOFF = "J5000";
+PcrDef.PCRVSCOFF = "J5000";
 /// <summary>
 /// VSC On  (J5001) 
 /// </summary>
-PcrDef.prototype.PCRVSCON = "J5001";
+PcrDef.PCRVSCON = "J5001";
 /// <summary>
 /// CTCSS - Tone Squelch Prefix (J51) 
 /// </summary>
-PcrDef.prototype.PCRTSQL = "J51";
+PcrDef.PCRTSQL = "J51";
 /// <summary>
 /// CTCSS - Tone Squelch Off (J5100) 
 /// </summary>
-PcrDef.prototype.PCRTSQLOFF = "J5100";
+PcrDef.PCRTSQLOFF = "J5100";
 /// <summary>
 /// Unknown - 1
 /// </summary>
-PcrDef.prototype.PCRUNK01 = "J4A";
+PcrDef.PCRUNK01 = "J4A";
 /// <summary>
 /// Unknown - 2
 /// </summary>
-PcrDef.prototype.PCRUNK02 = "J4A80";
+PcrDef.PCRUNK02 = "J4A80";
 /// <summary>
 /// Tracking filter Prefix (LD082) 
 /// </summary>
-PcrDef.prototype.PCRTFLTR = "LD82";
+PcrDef.PCRTFLTR = "LD82";
 /// <summary>
 /// Automagic Tracking Filter (LD8200) 
 /// </summary>
-PcrDef.prototype.PCRTFLTR00 = "LD8200";
+PcrDef.PCRTFLTR00 = "LD8200";
 /// <summary>
 /// Manual Tracking Filter (LD8201) 
 /// </summary>
-PcrDef.prototype.PCRTFLTR01 = "LD8201";
+PcrDef.PCRTFLTR01 = "LD8201";
 
 /// <summary>
 /// Freq. Header (K0) 
 /// </summary>
-PcrDef.prototype.PCRFRQ = "K0";
+PcrDef.PCRFRQ = "K0";
 /// <summary>
 /// freq. len. 10 bytes (padded) GMMMKKKHHH (10) 
 /// </summary>
-PcrDef.prototype.MAXFRQLEN = 10;
+PcrDef.MAXFRQLEN = 10;
 /// <summary>
 /// lower bounds for frequency 50 kHz (50000) 
 /// </summary>
-PcrDef.prototype.LOWERFRQ = 50000;	
+PcrDef.LOWERFRQ = 50000;	
 /// <summary>
 /// upper bound for frequency 1.3 GHz (1300000000) 
 /// </summary>
-PcrDef.prototype.UPPERFRQ = 1300000000;
+PcrDef.UPPERFRQ = 1300000000;
 /// <summary>
 /// Lower sideband (00) 
 /// </summary>
-PcrDef.prototype.PCRMODLSB = "00";
+PcrDef.PCRMODLSB = "00";
 /// <summary>
 /// Upper sideband (01) 
 /// </summary>
-PcrDef.prototype.PCRMODUSB = "01";
+PcrDef.PCRMODUSB = "01";
 /// <summary>
 /// Amplitude Modulated (02) 
 /// </summary>
-PcrDef.prototype.PCRMODAM = "02";
+PcrDef.PCRMODAM = "02";
 /// <summary>
 /// Continuous Mode (03) 
 /// </summary>
-PcrDef.prototype.PCRMODCW = "03";
+PcrDef.PCRMODCW = "03";
 /// <summary>
 /// unknown mode -- (04) 
 /// </summary>
-PcrDef.prototype.PCRMODUNK = "04";
+PcrDef.PCRMODUNK = "04";
 /// <summary>
 /// Narrowband FM (05) 
 /// </summary>
-PcrDef.prototype.PCRMODNFM = "05";
+PcrDef.PCRMODNFM = "05";
 /// <summary>
 /// Wideband FM (06) 
 /// </summary>
-PcrDef.prototype.PCRMODWFM = "06";
+PcrDef.PCRMODWFM = "06";
 /// <summary>
 /// 3 kHz Filter (00)	
 /// </summary>
-PcrDef.prototype.PCRFLTR3 = "00";
+PcrDef.PCRFLTR3 = "00";
 /// <summary>
 /// 6 kHz Filter (01) 	
 /// </summary>
-PcrDef.prototype.PCRFLTR6 = "01";
+PcrDef.PCRFLTR6 = "01";
 /// <summary>
 /// 15 kHz Filter (02) 	
 /// </summary>
-PcrDef.prototype.PCRFLTR15 = "02";
+PcrDef.PCRFLTR15 = "02";
 /// <summary>
 /// 50 kHz Filter (03) 	
 /// </summary>
-PcrDef.prototype.PCRFLTR50 = "03";
+PcrDef.PCRFLTR50 = "03";
 /// <summary>
 /// 230 kHz Filter (04)
 /// </summary>
-PcrDef.prototype.PCRFLTR230 = "04";
+PcrDef.PCRFLTR230 = "04";
 /// <summary>
 /// Query Squelch Setting (I0)
 /// </summary>
-PcrDef.prototype.PCRQSQL = "I0";
+PcrDef.PCRQSQL = "I0";
 /// <summary>
 /// Query Signal Strength (I1)
 /// </summary>
-PcrDef.prototype.PCRQRST = "I1?";
+PcrDef.PCRQRST = "I1?";
 /// <summary>
 /// Query Frequency Offset (I2)
 /// </summary>
-PcrDef.prototype.PCRQOFST = "I2";
+PcrDef.PCRQOFST = "I2";
 /// <summary>
 /// Query presense of DTMF Tone (I3)
 /// </summary>
-PcrDef.prototype.PCRQDTMF = "I3";
+PcrDef.PCRQDTMF = "I3";
 /// <summary>
 /// Query Firmware revision (I4)
 /// </summary>
-PcrDef.prototype.PCRQWAREZ = "G4";
+PcrDef.PCRQWAREZ = "G4";
 /// <summary>
 /// Query Presense of DSP (I5)
 /// </summary>
-PcrDef.prototype.PCRQDSP = "GD";
+PcrDef.PCRQDSP = "GD";
 /// <summary>
 /// Query country / region (I6)
 /// </summary>
-PcrDef.prototype.PCRQCTY = "GE";
+PcrDef.PCRQCTY = "GE";
 /// <summary>
 /// Reply: Ok (G000)
 /// </summary>
-PcrDef.prototype.PCRAOK = "G000";
+PcrDef.PCRAOK = "G000";
 /// <summary>
 /// Reply: Ok corrupt (G00?)
 /// </summary>
-PcrDef.prototype.PCRBOK = "G00?";
+PcrDef.PCRBOK = "G00?";
 /// <summary>
 /// Reply: There was an error (G001)
 /// </summary>
-PcrDef.prototype.PCRABAD = "G001";
+PcrDef.PCRABAD = "G001";
 /// <summary>
 /// DSP Header (PCRQDSP)
 /// </summary>
-PcrDef.prototype.PCRADSP = PcrDef.prototype.PCRQDSP;
+PcrDef.PCRADSP = PcrDef.PCRQDSP;
 /// <summary>
 /// Not present (GD00)
 /// </summary>
-PcrDef.prototype.PCRADSPNO = "GD00";
+PcrDef.PCRADSPNO = "GD00";
 /// <summary>
 /// Present (GD01)
 /// </summary>
-PcrDef.prototype.PCRADSPOK = "GD01";
+PcrDef.PCRADSPOK = "GD01";
 /// <summary>
 /// Squelch Header (PCRQSQL)
 /// </summary>
-PcrDef.prototype.PCRASQL = PcrDef.prototype.PCRQSQL;
+PcrDef.PCRASQL = PcrDef.PCRQSQL;
 /// <summary>
 /// Sqlch Closed (04)
 /// </summary>
-PcrDef.prototype.PCRASQLCL = "04";
+PcrDef.PCRASQLCL = "04";
 /// <summary>
 /// Sqlch Open (07)
 /// </summary>
-PcrDef.prototype.PCRASQLOPN = "07";
+PcrDef.PCRASQLOPN = "07";
 /// <summary>
 /// Signal Strength (PCRQRST)
 /// \b note: You have this header
 ///          plus 00-FF from weak to strong
 /// </summary>
-PcrDef.prototype.PCRARST = PcrDef.prototype.PCRQRST;
+PcrDef.PCRARST = PcrDef.PCRQRST;
 /// <summary>
 /// Frequency offset Header (PCRQOFST)
 ///	\b note: plus 00-7F from extreme (-) to near ctr OR
 ///          plus 81-FF from near ctr to extreme (+)
 /// </summary>
-PcrDef.prototype.PCRAOFST = PcrDef.prototype.PCRQOFST;
+PcrDef.PCRAOFST = PcrDef.PCRQOFST;
 /// <summary>
 /// Frequency (offset) centered (I280)
 /// </summary>
-PcrDef.prototype.PCRAOFSTCTR = "I280";
+PcrDef.PCRAOFSTCTR = "I280";
 
 /// <summary>
 /// DTMF Header (PCRQDTMF)
 /// </summary>
-PcrDef.prototype.PCRADTMF = PcrDef.prototype.PCRQDTMF;
+PcrDef.PCRADTMF = PcrDef.PCRQDTMF;
 /// <summary>
 /// DTMF Not Heard (I300)
 /// </summary>
-PcrDef.prototype.PCRADTMFNO = "I300";
+PcrDef.PCRADTMFNO = "I300";
 /// <summary>
 /// DTMF 0 (I310)
 /// </summary>
-PcrDef.prototype.PCRADTMF0 = "I310";
+PcrDef.PCRADTMF0 = "I310";
 /// <summary>
 /// DTMF 1 (I311)
 /// </summary>
-PcrDef.prototype.PCRADTMF1 = "I311";
+PcrDef.PCRADTMF1 = "I311";
 /// <summary>
 /// DTMF 2 (I312)
 /// </summary>
-PcrDef.prototype.PCRADTMF2 = "I312";
+PcrDef.PCRADTMF2 = "I312";
 /// <summary>
 /// DTMF 3 (I313)
 /// </summary>
-PcrDef.prototype.PCRADTMF3 = "I313";
+PcrDef.PCRADTMF3 = "I313";
 /// <summary>
 /// DTMF 4 (I314) 	
 /// </summary>
-PcrDef.prototype.PCRADTMF4 = "I314";
+PcrDef.PCRADTMF4 = "I314";
 /// <summary>
 /// DTMF 5 (I315)
 /// </summary>
-PcrDef.prototype.PCRADTMF5 = "I315";
+PcrDef.PCRADTMF5 = "I315";
 /// <summary>
 /// DTMF 6 (I315)
 /// </summary>
-PcrDef.prototype.PCRADTMF6 = "I316";
+PcrDef.PCRADTMF6 = "I316";
 /// <summary>
 /// DTMF 7 (I316)
 /// </summary>
-PcrDef.prototype.PCRADTMF7 = "I317";
+PcrDef.PCRADTMF7 = "I317";
 /// <summary>
 /// DTMF 8 (I318)
 /// </summary>
-PcrDef.prototype.PCRADTMF8 = "I318";
+PcrDef.PCRADTMF8 = "I318";
 /// <summary>
 /// DTMF 9 (I319)
 /// </summary>
-PcrDef.prototype.PCRADTMF9 = "I319";
+PcrDef.PCRADTMF9 = "I319";
 /// <summary>
 /// DTMF A (I31A)
 /// </summary>
-PcrDef.prototype.PCRADTMFA = "I31A";
+PcrDef.PCRADTMFA = "I31A";
 /// <summary>
 /// DTMF B (I31B)
 /// </summary>
-PcrDef.prototype.PCRADTMFB = "I31B";
+PcrDef.PCRADTMFB = "I31B";
 /// <summary>
 /// DTMF C (I31C)
 /// </summary>
-PcrDef.prototype.PCRADTMFC = "I31C";
+PcrDef.PCRADTMFC = "I31C";
 /// <summary>
 /// DTMF D (I31D)
 /// </summary>
-PcrDef.prototype.PCRADTMFD = "I31D";
+PcrDef.PCRADTMFD = "I31D";
 /// <summary>
 /// DTMF * (I31E)
 /// </summary>
-PcrDef.prototype.PCRADTMFS = "I31E";
+PcrDef.PCRADTMFS = "I31E";
 /// <summary>
 /// DTMF # (I31F)
 /// </summary>
-PcrDef.prototype.PCRADTMFP = "I31F";
+PcrDef.PCRADTMFP = "I31F";
 
 /* Radio miscellaneous functions */
 /// <summary>
 /// Baud Rate Header (G1)
 /// </summary>
-PcrDef.prototype.PCRBD = "G1";
+PcrDef.PCRBD = "G1";
 /// <summary>
 /// 300 baud (G100)
 /// </summary>
-PcrDef.prototype.PCRBD300 = "G100";
+PcrDef.PCRBD300 = "G100";
 /// <summary>
 /// 1200 baud (G101)
 /// </summary>
-PcrDef.prototype.PCRBD1200 = "G101";
+PcrDef.PCRBD1200 = "G101";
 /// <summary>
 /// 2400 baud (G102)
 /// </summary>
-PcrDef.prototype.PCRBD2400 = "G102";
+PcrDef.PCRBD2400 = "G102";
 /// <summary>
 /// 9600 baud (G103)
 /// </summary>
-PcrDef.prototype.PCRBD9600 = "G103";
+PcrDef.PCRBD9600 = "G103";
 /// <summary>
 /// 19200 baud (G104)
 /// </summary>
-PcrDef.prototype.PCRBD19200 = "G104";
+PcrDef.PCRBD19200 = "G104";
 /// <summary>
 /// 38400 baud (G105)
 /// </summary>
-PcrDef.prototype.PCRBD38400 = "G105";
+PcrDef.PCRBD38400 = "G105";
 
 /* BandScope functions */
 /// <summary>
 /// bandscope prefix SENT (ME00001)
 /// </summary>
-PcrDef.prototype.PCRSBSC = "ME00001";	
+PcrDef.PCRSBSC = "ME00001";	
 /// <summary>
 /// bandscope prefix RECV (NE1)
 /// </summary>
-PcrDef.prototype.PCRRBSC = "NE1";		
+PcrDef.PCRRBSC = "NE1";		
 /// <summary>
 /// packet 0 (NE100)
 /// </summary>
-PcrDef.prototype.PCRRBSC0 = "NE100";		
+PcrDef.PCRRBSC0 = "NE100";		
 /// <summary>
 /// packet 1 (NE110)
 /// </summary>
-PcrDef.prototype.PCRRBSC1 = "NE110";	
+PcrDef.PCRRBSC1 = "NE110";	
 /// <summary>
 /// packet 2 (NE120)
 /// </summary>
-PcrDef.prototype.PCRRBSC2 = "NE120";	
+PcrDef.PCRRBSC2 = "NE120";	
 /// <summary>
 /// packet 3 (NE130)
 /// </summary>
-PcrDef.prototype.PCRRBSC3 = "NE130";
+PcrDef.PCRRBSC3 = "NE130";
 /// <summary>
 /// packet 4 (NE140)
 /// </summary>
-PcrDef.prototype.PCRRBSC4 = "NE140";
+PcrDef.PCRRBSC4 = "NE140";
 /// <summary>
 /// packet 5 (NE150)
 /// </summary>
-PcrDef.prototype.PCRRBSC5 = "NE150";
+PcrDef.PCRRBSC5 = "NE150";
 /// <summary>
 /// packet 6 (NE160)
 /// </summary>
-PcrDef.prototype.PCRRBSC6 = "NE160";
+PcrDef.PCRRBSC6 = "NE160";
 /// <summary>
 /// packet 7 (NE170)
 /// </summary>
-PcrDef.prototype.PCRRBSC7 = "NE170";
+PcrDef.PCRRBSC7 = "NE170";
 /// <summary>
 /// packet 8 (NE180)
 /// </summary>
-PcrDef.prototype.PCRRBSC8 = "NE180";
+PcrDef.PCRRBSC8 = "NE180";
 /// <summary>
 /// packet 9 (NE190)
 /// </summary>
-PcrDef.prototype.PCRRBSC9 = "NE190";
+PcrDef.PCRRBSC9 = "NE190";
 /// <summary>
 /// packet 10 (NE1A0)
 /// </summary>
-PcrDef.prototype.PCRRBSCA = "NE1A0";
+PcrDef.PCRRBSCA = "NE1A0";
 /// <summary>
 /// packet 11 (NE1B0)
 /// </summary>
-PcrDef.prototype.PCRRBSCB = "NE1B0";
+PcrDef.PCRRBSCB = "NE1B0";
 /// <summary>
 /// packet 12 (NE1C0)
 /// </summary>
-PcrDef.prototype.PCRRBSCC = "NE1C0";
+PcrDef.PCRRBSCC = "NE1C0";
 /// <summary>
 /// packet 13 (NE1D0)
 /// </summary>
-PcrDef.prototype.PCRRBSCD = "NE1D0";
+PcrDef.PCRRBSCD = "NE1D0";
 /// <summary>
 /// packet 14 (NE1E0)
 /// </summary>
-PcrDef.prototype.PCRRBSCE = "NE1E0";
+PcrDef.PCRRBSCE = "NE1E0";
 /// <summary>
 /// packet 15 (NE1F0)
 /// </summary>
-PcrDef.prototype.PCRRBSCF = "NE1F0";
+PcrDef.PCRRBSCF = "NE1F0";

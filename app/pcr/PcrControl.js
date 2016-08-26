@@ -13,10 +13,11 @@
 
 let PcrDef = require('./PcrDef.js');
 
-class Debug {}
-Debug.prototype.WriteLine = (text) => {
-    console.log(text);
-};
+let Debug = {
+    WriteLine: (text) => {
+        console.log(text);
+    }
+}
 
 /// <summary>
 ///     Stores the important radio information for the current
@@ -101,13 +102,23 @@ let PRadInf = class
 ///     Control class for the PCR1000
 /// </summary>
 module.exports = class PcrControl
-{        
+{
+    // http://stackoverflow.com/questions/10073699/pad-a-number-with-leading-zeros-in-javascript
+    padDigits(number, digits) {
+        return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+    }
+
+    // http://stackoverflow.com/questions/12291755/how-to-convert-dec-to-hex-in-javascript
+    toHex(dec) {
+        return (+dec).toString(16).toUpperCase();
+    }
+
     /// <summary>
     /// Instantiates a new PCR1000 controller
     /// </summary>
     /// <param name="communicationChannel">Channel to use to communicate with the radio.</param>
     /// <exception cref="UnauthorizedAccessException">If the communication channel cannot be opened.</exception>
-    constructor (communicationChannel, readyCallback)
+    constructor (communicationChannel, readyCallback = () => {})
     {
         this._pcrRadio = new PRadInf();
         this._pcrComm = communicationChannel;
@@ -125,7 +136,7 @@ module.exports = class PcrControl
         this._pcrStatus = false;
         this._pcrComm.PcrOpen((success) => {
             if (!success) {
-                throw "Access was not granted to the communication channel.";
+                throw new Error("Access was not granted to the communication channel.");
             }
             readyCallback();
         });
@@ -237,7 +248,7 @@ module.exports = class PcrControl
     PcrGetFreqStr()
     {
         Debug.WriteLine("PcrControl PcrGetFreqStr");
-        return this._pcrRadio.PcrFreq.ToString("0000000000");
+        return this.padDigits(this._pcrRadio.PcrFreq, 10);
     }
         
     /// <summary>
@@ -471,14 +482,16 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrInit");
         Debug.WriteLine("Radio is coming up. Please wait...\n");
             
-        if (!this._pcrStatus) return callback(false);
+        if (!this._pcrStatus) {
+            callback(false);
+            return;
+        }
         this._pcrComm.SendWait(PcrDef.PCRINITA, (response) => {
             if (!this.PcrCheckResponse(response)) return callback(false);
             this._pcrRadio.PcrAutoUpdate = false;
             this._pcrComm.AutoUpdate = false;
             return callback(true);
         });
-        
     }
         
     /// <summary>
@@ -582,10 +595,10 @@ module.exports = class PcrControl
             case "230":
                 this._pcrRadio.PcrFilter = PcrDef.PCRFLTR230; break;
             default:
-                return callback(false);
+                callback(false); return;
         }
             
-        var temp = PcrDef.PCRFRQ + this._pcrRadio.PcrFreq.ToString("0000000000") + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
+        var temp = PcrDef.PCRFRQ + this.padDigits(this._pcrRadio.PcrFreq, 10) + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
         this._pcrComm.SendWait(temp, (response) => {
             return callback(this.PcrCheckResponse(response));
         });
@@ -624,7 +637,7 @@ module.exports = class PcrControl
     {
         Debug.WriteLine("PcrControl PcrSetFreq");
         if ((PcrDef.LOWERFRQ <= freq) && (freq <= PcrDef.UPPERFRQ)) {
-            var freqConv = freq.ToString("0000000000");
+            var freqConv = this.padDigits(freq, 10);
             var temp = PcrDef.PCRFRQ + freqConv + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
             this._pcrComm.SendWait(temp, (resp) => {
                 if (this.PcrCheckResponse(resp)) {
@@ -656,7 +669,7 @@ module.exports = class PcrControl
     PcrSetMode(mode, callback)
     {
         Debug.WriteLine("Setting PcrRadio.PcrMode");
-        mode = mode.ToLower();
+        mode = mode.trim().toLowerCase();
             
         switch (mode) {
             case "am":
@@ -672,10 +685,10 @@ module.exports = class PcrControl
             case "wfm":
                 this._pcrRadio.PcrMode = PcrDef.PCRMODWFM; break;
             default:
-                return false;
+                callback(false); return;
         }
             
-        var temp = PcrDef.PCRFRQ + this._pcrRadio.PcrFreq.ToString("0000000000") + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
+        var temp = PcrDef.PCRFRQ + this.padDigits(this._pcrRadio.PcrFreq, 10) + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
         this._pcrComm.SendWait(temp, (response) => {
             callback(this.PcrCheckResponse(response));
         });
@@ -724,7 +737,7 @@ module.exports = class PcrControl
             });
         }
         catch (e) {
-            return callback(false);
+            callback(false);
         }
     }
         
@@ -768,9 +781,12 @@ module.exports = class PcrControl
     PcrSetSquelch(squelch, callback)
     {
         Debug.WriteLine("PcrControl PcrSetSquelch");
-        if ((0 > squelch) || (squelch > 100)) return callback(false);
+        if ((0 > squelch) || (squelch > 100)) {
+            callback(false);
+            return;
+        }
         squelch = parseInt((256.0 / 100.0) * squelch);
-        var temp = PcrDef.PCRSQL + squelch.ToString("X2");
+        var temp = PcrDef.PCRSQL + this.toHex(squelch);
         this._pcrComm.SendWait(temp, (response) => {
             if (!this.PcrCheckResponse(response)) return callback(false);
             this._pcrRadio.PcrSquelch = squelch;
@@ -946,9 +962,12 @@ module.exports = class PcrControl
     PcrSetVolume(volume, callback)
     {
         Debug.WriteLine("PcrControl PcrSetVolume");
-        if ((0 > volume) || (volume > 100)) return callback(false);
+        if ((0 > volume) || (volume > 100)) {
+            callback(false);
+            return;
+        }
         volume = parseInt((256.0 / 100.0) * volume);
-        var temp = PcrDef.PCRVOL + volume.ToString("X2");
+        var temp = PcrDef.PCRVOL + this.toHex(volume);
     
         this._pcrComm.SendWait(temp, (response) => {
             if (!this.PcrCheckResponse(response)) return callback(false);

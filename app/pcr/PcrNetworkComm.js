@@ -20,64 +20,42 @@ let Debug = {
     }
 };
 
-class ClientRequestCode {};
-ClientRequestCode.prototype.UNKNOWN = 0;
-ClientRequestCode.prototype.ECHO = 1;
-ClientRequestCode.prototype.HASCONTROL = 2;
-ClientRequestCode.prototype.TAKECONTROL = 3;
-ClientRequestCode.prototype.DISCONNECT = 4;
+let ClientRequestCode = {
+    UNKNOWN: 0,
+    ECHO: 1,
+    HASCONTROL: 2,
+    TAKECONTROL: 3,
+    DISCONNECT: 4
+};
 
-class ClientResponseCode {};
+let ClientResponseCode = {
+    // Client Hello
+    ERR_HELLO_NOTFOUND: 0,
+    ERR_HELLO_INVALID: 1,
+    WAR_HELLO_UNKNOWN: 2,
+    ERR_PROTOVER_TOOOLD: 3,
+    SUC_HELLO_PASSED: 4,
 
-// Client Hello
-ClientResponseCode.prototype.ERR_HELLO_NOTFOUND = 0;
-ClientResponseCode.prototype.ERR_HELLO_INVALID = 1;
-ClientResponseCode.prototype.WAR_HELLO_UNKNOWN = 2;
-ClientResponseCode.prototype.ERR_PROTOVER_TOOOLD = 3;
-ClientResponseCode.prototype.SUC_HELLO_PASSED = 4;
+    // Auth
+    INF_AUTH_REQUIRED: 6,
+    ERR_AUTH_NOTFOUND: 7,
+    ERR_AUTH_INVALID: 8,
+    ERR_AUTH_INCORRECT: 9,
+    SUC_AUTH_PASSED: 10,
 
-// Auth
-ClientResponseCode.prototype.INF_AUTH_REQUIRED = 6;
-ClientResponseCode.prototype.ERR_AUTH_NOTFOUND = 7;
-ClientResponseCode.prototype.ERR_AUTH_INVALID = 8;
-ClientResponseCode.prototype.ERR_AUTH_INCORRECT = 9;
-ClientResponseCode.prototype.SUC_AUTH_PASSED = 10;
+    // Other
+    SUC_ECHO_RESPONSE: 11,
+    SUC_HASCONTROL_RESPONSE: 12,
+    SUC_TAKECONTROL_RESPONSE: 13,
+    WAR_COMMAND_UNKNOWN: 14,
+    INF_CLIENT_DISCONNECT: 15,
 
-// Other
-ClientResponseCode.prototype.SUC_ECHO_RESPONSE = 11;
-ClientResponseCode.prototype.SUC_HASCONTROL_RESPONSE = 12;
-ClientResponseCode.prototype.SUC_TAKECONTROL_RESPONSE = 13;
-ClientResponseCode.prototype.WAR_COMMAND_UNKNOWN = 14;
-ClientResponseCode.prototype.INF_CLIENT_DISCONNECT = 15;
-
-// Query
-ClientResponseCode.prototype.ERR_QUERY_FAILED = 16;
-ClientResponseCode.prototype.ERR_HASCONTROL_RESPONSE = 17;
+    // Query
+    ERR_QUERY_FAILED: 16,
+    ERR_HASCONTROL_RESPONSE: 17
+};
 
 const ServerPrefix = "$";
-
-/// <summary>
-/// Received message structure.
-/// </summary>
-class RecvMsg
-{
-    constructor(msg, time) {
-	    /// <summary>
-	    /// The message received.
-	    /// </summary>
-	    this.Message = msg;
-
-	    /// <summary>
-	    /// The time the message was received.
-	    /// </summary>
-	    this.Time = time;
-    }
-}
-
-/// <summary>
-/// Unnessercery characters potentially returned in each message.
-/// </summary>
-const TrimChars = ['\n', '\r', ' ', '\t', '\0'];
 
 /// <summary>
 /// Client to connect to a remote radio.
@@ -90,17 +68,17 @@ module.exports = class PcrNetworkClient extends EventEmitter
 		{
             if (this._listenQueue.length > 0) {
                 let callback = this._listenQueue.shift();
-                callback(datarecv);
+                callback(datarecv.toString());
             }
             else {
-                this.emit('data', datarecv);
+                this.emit('data', datarecv.toString());
             }
 
 			Debug.WriteLine(this._server + ":" + this._port + " : RECV -> " + datarecv);
 		}
 		catch (e)
 		{
-			Debug.WriteLine("A socket read failure occurred:\n" + e.Message + "\r\n" + e.StackTrace);
+			Debug.WriteLine("A socket read failure occurred:\n" + e.message + "\r\n" + e.stack);
 		}
 	}
 
@@ -116,7 +94,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 	{
 		if (!server || server.trim().length === 0 || port <= 0)
 		{
-			throw "Invalid Instantiation Arguments";
+			throw new Error("Invalid Instantiation Arguments");
 		}
 	    super();
 		this._password = password;
@@ -173,7 +151,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 	{
 		Debug.WriteLine("PcrNetwork SendWait");
         if (!callback) {
-            throw 'Use send instead of sendwait...';
+            throw new Error('Use send instead of sendwait...');
         }
 	    this._listenQueue.push(callback);
 		this.Send(cmd);
@@ -225,7 +203,8 @@ module.exports = class PcrNetworkClient extends EventEmitter
 		{
 			if (this._tcpClient != null && this._tcpClient.Connected)
 			{
-				return callback(true);
+				callback(true);
+			    return;
 			}
 
             let self = this;
@@ -242,7 +221,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
                 Debug.WriteLine('Connected to PCR server.');
                 this._tcpClient.Connected = true;
                 this.PerformClientHello((code) => {
-                    if (code === this.ClientResponseCode.INF_AUTH_REQUIRED) {
+                    if (code === ClientResponseCode.INF_AUTH_REQUIRED) {
                         this.PerformClientAuth(callback);
                     }
                     else {
@@ -254,7 +233,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 		catch (ex)
 		{
 			Debug.WriteLine(ex.Message);
-			return callback(false);
+			callback(false);
 		}
 	}
 
@@ -294,7 +273,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 		    var code = this.ParseClientCode(response);
 		    if (code !== ClientResponseCode.SUC_HELLO_PASSED && code !== ClientResponseCode.INF_AUTH_REQUIRED)
 		    {
-			    throw "Cannot connect to server correctly. " + response + ".";
+			    throw new Error("Cannot connect to server correctly. " + response + ".");
 		    }
 		    callback(code);
 		});
@@ -305,7 +284,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 		this.SendWait(ServerPrefix + "AUTH \"" + this._password + "\"", (response) => {
 		    if (!response.StartsWith(ServerPrefix + ClientResponseCode.SUC_AUTH_PASSED))
 		    {
-			    throw "Cannot authenticate with server correctly. " + response + ".";
+			    throw new Error("Cannot authenticate with server correctly. " + response + ".");
 		    }
 		    callback(true);
 		});
@@ -313,16 +292,16 @@ module.exports = class PcrNetworkClient extends EventEmitter
 
 	ParseClientCode(input)
 	{
-		if (!input || input.trim().length === 0 || !input.Contains(" ") || !input.StartsWith(ServerPrefix))
+		if (!input || input.trim().length === 0 || input.indexOf(" ") < 0 || !input.startsWith(ServerPrefix))
 		{
-			throw "Invalid response received from server.";
+			throw new Error("Invalid response received from server.");
 		}
 
-		input = input.substring(1, input.indexOf(" ") - 1);
-		let code = ClientResponseCode.prototype[input];
+		input = input.substring(1, input.indexOf(" "));
+		let code = ClientResponseCode[input];
 		if (!code)
 		{
-			throw "Invalid response received from server.";
+			throw new Error("Invalid response received from server.");
 		}
 		return code;
 	}

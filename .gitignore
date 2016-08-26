@@ -11,3 +11,4 @@ obj/
 typings/*
 bin/*
 nohup.out
+*su
