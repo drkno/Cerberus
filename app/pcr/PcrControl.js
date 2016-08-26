@@ -622,7 +622,7 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="filter"></param>
     /// <returns></returns>
-    PcrSetFilter(filter, callback)
+    PcrSetFilterN(filter, callback)
     {
         Debug.WriteLine("PcrControl PcrSetFilter");
         return this.PcrSetFilter(filter + '', callback);
@@ -829,7 +829,7 @@ module.exports = class PcrControl
     /// success or failure. On failure, it turns off CTCSS
     /// and returns false.
     /// </returns>
-    PcrSetToneSq(passValue, callback)
+    PcrSetToneSqN(passValue, callback)
     {
         Debug.WriteLine("PcrControl PcrSetToneSq");
             
@@ -945,7 +945,7 @@ module.exports = class PcrControl
                 this.PcrSetToneSq("00", callback);
                 break;
         }
-        return false;
+        return callback(false);
     }
         
     /// <summary>

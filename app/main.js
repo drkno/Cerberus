@@ -86,12 +86,32 @@ exports.run = (config) => {
     settingsUpdate('mode', (val) => {
         control.PcrSetMode(val, blankCallback);
     });
-    settingsUpdate('afGain');
-    settingsUpdate('filter');
-    settingsUpdate('squelch');
-    settingsUpdate('toneSquelch');
-    settingsUpdate('noiseBlank');
-    settingsUpdate('frequency');
+    settingsUpdate('afGain', (val) => {
+        control.PcrSetVolume(val, blankCallback);
+    });
+    settingsUpdate('filter', (val) => {
+        let value = 0;
+        if (val.indexOf('k')) {
+            value = parseInt(val.substr(0, val.indexOf('k')));
+        }
+        control.PcrSetFilterN(value, blankCallback);
+    });
+    settingsUpdate('squelch', (val) => {
+        control.PcrSetSquelch(val, blankCallback);
+    });
+    settingsUpdate('toneSquelch', (val) => {
+        let value = 0;
+        if (val.indexOf('Hz')) {
+            value = parseInt((parseFloat(val.substr(0, val.indexOf(' '))) * 10).toString());
+        }
+        control.PcrSetToneSqN(value, blankCallback);
+    });
+    settingsUpdate('noiseBlank', (val) => {
+        control.PcrSetNb(val, blankCallback);
+    });
+    settingsUpdate('frequency', (val) => {
+        control.PcrSetFreq(val, blankCallback);
+    });
 
 	server.start();
 };

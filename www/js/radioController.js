@@ -202,11 +202,5 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
       };
       //#endregion
       
-
-      
-
-      
-
-      
     }
 ]);
