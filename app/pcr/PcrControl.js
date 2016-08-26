@@ -19,6 +19,85 @@ Debug.prototype.WriteLine = (text) => {
 };
 
 /// <summary>
+///     Stores the important radio information for the current
+///     state of the radio.
+/// </summary>
+let PRadInf = class
+{
+    constructor() {
+        /// <summary>
+        ///     Currenly set autogain
+        /// </summary>
+        this.PcrAutoGain = null;
+
+        /// <summary>
+        ///     Currently set update mode?
+        /// </summary>
+        this.PcrAutoUpdate = null;
+
+        /// <summary>
+        ///     Currently set radio Filter [128]
+        /// </summary>
+        this.PcrFilter = null; //[128];
+
+        /// <summary>
+        ///     Currently set frequency
+        /// </summary>
+        this.PcrFreq = null;
+
+        /// <summary>
+        ///     Currently set speed (char * version, unstable) [8]
+        /// </summary>
+        this.PcrInitSpeed = null; //[8];
+
+        /// <summary>
+        ///     Currently set radio Mode [128]
+        /// </summary>
+        this.PcrMode = null; //[128];
+
+        /// <summary>
+        ///     Currently set noiseblanking
+        /// </summary>
+        this.PcrNoiseBlank = null;
+
+        /// <summary>
+        ///     Currently active port/device [64]
+        /// </summary>
+        this.PcrPort = null; // = new char[64];
+
+        /// <summary>
+        ///     Currently set RF Attenuation
+        /// </summary>
+        this.PcrRfAttenuator = null;
+
+        /// <summary>
+        ///     Currently set speed (uint var)
+        /// </summary>
+        this.PcrSpeed = null;
+
+        /// <summary>
+        ///     Currently set squlech
+        /// </summary>
+        this.PcrSquelch = null;
+
+        /// <summary>
+        ///     Currently set CTCSS (unstable)
+        /// </summary>
+        this.PcrToneSq = null;
+
+        /// <summary>
+        ///     Currently set CTCSS (float)
+        /// </summary>
+        this.PcrToneSqFloat = null;
+
+        /// <summary>
+        ///     Currently set volume
+        /// </summary>
+        this.PcrVolume = null;
+    }
+};
+
+/// <summary>
 ///     Control class for the PCR1000
 /// </summary>
 module.exports = class PcrControl
@@ -28,7 +107,7 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="communicationChannel">Channel to use to communicate with the radio.</param>
     /// <exception cref="UnauthorizedAccessException">If the communication channel cannot be opened.</exception>
-    constructor (communicationChannel)
+    constructor (communicationChannel, readyCallback)
     {
         this._pcrRadio = new PRadInf();
         this._pcrComm = communicationChannel;
@@ -44,9 +123,12 @@ module.exports = class PcrControl
         this._pcrRadio.PcrRfAttenuator = false;
         this._pcrRadio.PcrAutoUpdate = false;
         this._pcrStatus = false;
-        if (!this._pcrComm.PcrOpen()) {
-            throw "Access was not granted to the communication channel.";
-        }
+        this._pcrComm.PcrOpen((success) => {
+            if (!success) {
+                throw "Access was not granted to the communication channel.";
+            }
+            readyCallback();
+        });
     }
         
     /// <summary>
@@ -251,18 +333,18 @@ module.exports = class PcrControl
     {
         Debug.WriteLine("PcrControl PcrSetRadioInfo");
         this.PcrSetAutoupdate(radioInf.PcrAutoUpdate);
-        this.PcrSetAutoGain(radioInf.PcrAutoGain);
-        this.PcrSetNb(radioInf.PcrNoiseBlank);
+        this.PcrSetAutoGain(radioInf.PcrAutoGain, ()=>{});
+        this.PcrSetNb(radioInf.PcrNoiseBlank, () =>{});
         // radioInf.PcrPort; - TODO: Fix Buggy Implementation
-        this.PcrSetRfAttenuator(radioInf.PcrRfAttenuator);
+        this.PcrSetRfAttenuator(radioInf.PcrRfAttenuator, ()=> {});
         // PcrSetSpeed(radioInf.PcrSpeed); - TODO: Fix Buggy implementation
         // radioInf.PcrInitSpeed; - same as above
         this._pcrRadio.PcrMode = radioInf.PcrMode;
         this._pcrRadio.PcrFilter = radioInf.PcrFilter;
-        this.PcrSetFreq(radioInf.PcrFreq);
-        this.PcrSetSquelch(radioInf.PcrSquelch);
-        this.PcrSetToneSq(radioInf.PcrToneSqFloat);
-        this.PcrSetVolume(radioInf.PcrVolume);
+        this.PcrSetFreq(radioInf.PcrFreq, ()=>{});
+        this.PcrSetSquelch(radioInf.PcrSquelch, ()=> {});
+        this.PcrSetToneSq(radioInf.PcrToneSqFloat, ()=>{});
+        this.PcrSetVolume(radioInf.PcrVolume, ()=>{});
     }
         
     /// <summary>
@@ -384,24 +466,19 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="autoUpdate">Initialise the radio in autoUpdate mode</param>
     /// <returns>On success : true otherwise false.</returns>
-    PcrInit(autoUpdate = false)
+    PcrInit(callback)
     {
         Debug.WriteLine("PcrControl PcrInit");
-        if (!autoUpdate) {
-            Debug.WriteLine("Radio is coming up. Please wait...\n");
-                
-            if (!this._pcrStatus) return false;
-            if (!this.PcrCheckResponse(this._pcrComm.SendWait(PcrDef.PCRINITA))) return false;
+        Debug.WriteLine("Radio is coming up. Please wait...\n");
+            
+        if (!this._pcrStatus) return callback(false);
+        this._pcrComm.SendWait(PcrDef.PCRINITA, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
             this._pcrRadio.PcrAutoUpdate = false;
             this._pcrComm.AutoUpdate = false;
-            return true;
-        }
-            
-        if (!this._pcrStatus) return false;
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(PcrDef.PCRINITA))) return false;
-        this._pcrRadio.PcrAutoUpdate = true;
-        this._pcrComm.AutoUpdate = true;
-        return true;
+            return callback(true);
+        });
+        
     }
         
     /// <summary>
@@ -418,65 +495,71 @@ module.exports = class PcrControl
     ///     Powers the radio down.
     /// </summary>
     /// <returns></returns>
-    PcrPowerDown()
+    PcrPowerDown(callback)
     {
         Debug.WriteLine("PcrControl PcrPowerDown");
-        // if (PcrCheckResponse()) {
-        this.PcrCheckResponse(this._pcrComm.SendWait(PcrDef.PCRPWROFF));
-        this._pcrStatus = false;
-        return true;
+        this._pcrComm.SendWait(PcrDef.PCRPWROFF, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrStatus = false;
+            return callback(true);
+        });
     }
         
     /// <summary>
     ///     Powers the radio on.
     /// </summary>
     /// <returns></returns>
-    PcrPowerUp()
+    PcrPowerUp(callback)
     {
         Debug.WriteLine("PcrControl PcrPowerUp");
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(PcrDef.PCRPWRON))) return false;
-        //_pcrComm.SendWait("G301");
-        //	PcrCheckResponse();
-        this._pcrStatus = true;
-        return true;
+        this._pcrComm.SendWait(PcrDef.PCRPWRON, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrStatus = true;
+            return callback(true);
+        });
     }
         
     /// <summary>
     ///     Querys radio acutator status.
     /// </summary>
     /// <returns></returns>
-    PcrQueryOn()
+    PcrQueryOn(callback)
     {
         Debug.WriteLine("PcrControl PcrQueryOn");
         const mesg = "H1";
-        var temp = this._pcrComm.SendWait(mesg);
-        if (temp === "") return false;
-        return temp === "H101";
+        this._pcrComm.SendWait(mesg, (response) => {
+            if (response === "") return callback(false);
+            return callback(response === "H101");
+        });
+        
     }
         
     /// <summary>
     ///     Querys radio's squelch status.
     /// </summary>
     /// <returns></returns>
-    PcrQuerySquelch()
+    PcrQuerySquelch(callback)
     {
         Debug.WriteLine("PcrControl PcrQuerySquelch");
         var tempvar1 = PcrDef.PCRASQL + PcrDef.PCRASQLCL;
-        var temp = this._pcrComm.SendWait(PcrDef.PCRQSQL);
-        if (temp === "") return false;
-        return temp === tempvar1;
+        this._pcrComm.SendWait(PcrDef.PCRQSQL, (temp) => {
+            if (temp === "") return callback(false);
+            return callback(temp === tempvar1);
+        });
     }
         
     /// <summary>
     ///     Toggle autogain functionality.
     /// </summary>
     /// <param name="value"></param>
-    PcrSetAutoGain(value)
+    PcrSetAutoGain(value, callback)
     {
         Debug.WriteLine("PcrControl PcrSetAutoGain");
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(value ? PcrDef.PCRAGCON : PcrDef.PCRAGCOFF))) return false;
-        this._pcrRadio.PcrAutoGain = value;
-        return true;
+        this._pcrComm.SendWait(value ? PcrDef.PCRAGCON : PcrDef.PCRAGCOFF, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrRadio.PcrAutoGain = value;
+            return callback(true);
+        });
     }
         
     /// <summary>
@@ -484,7 +567,7 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="filter"></param>
     /// <returns></returns>
-    PcrSetFilter(filter)
+    PcrSetFilter(filter, callback)
     {
         Debug.WriteLine("Setting PcrRadio.PcrFilter");
         switch (filter) {
@@ -499,11 +582,13 @@ module.exports = class PcrControl
             case "230":
                 this._pcrRadio.PcrFilter = PcrDef.PCRFLTR230; break;
             default:
-                return false;
+                return callback(false);
         }
             
         var temp = PcrDef.PCRFRQ + this._pcrRadio.PcrFreq.ToString("0000000000") + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
-        return this.PcrCheckResponse(this._pcrComm.SendWait(temp));
+        this._pcrComm.SendWait(temp, (response) => {
+            return callback(this.PcrCheckResponse(response));
+        });
     }
         
     /// <summary>
@@ -512,9 +597,11 @@ module.exports = class PcrControl
     /// <param name="autoupdate"></param>
     PcrSetAutoupdate(autoupdate)
     {
-        if (this.PcrCheckResponse(this._pcrComm.SendWait(autoupdate ? PcrDef.PCRSIGON : PcrDef.PCRSIGOFF))) {
-            this._pcrComm.AutoUpdate = this._pcrRadio.PcrAutoUpdate = autoupdate;
-        }
+        this._pcrComm.SendWait(autoupdate ? PcrDef.PCRSIGON : PcrDef.PCRSIGOFF, (response) => {
+            if (this.PcrCheckResponse(response)) {
+                this._pcrComm.AutoUpdate = this._pcrRadio.PcrAutoUpdate = autoupdate;
+            }
+        });
     }
         
     /// <summary>
@@ -522,10 +609,10 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="filter"></param>
     /// <returns></returns>
-    PcrSetFilter(filter)
+    PcrSetFilter(filter, callback)
     {
         Debug.WriteLine("PcrControl PcrSetFilter");
-        return this.PcrSetFilter(filter + '');
+        return this.PcrSetFilter(filter + '', callback);
     }
         
     /// <summary>
@@ -533,21 +620,22 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="freq"></param>
     /// <returns></returns>
-    PcrSetFreq(freq)
+    PcrSetFreq(freq, callback)
     {
         Debug.WriteLine("PcrControl PcrSetFreq");
         if ((PcrDef.LOWERFRQ <= freq) && (freq <= PcrDef.UPPERFRQ)) {
             var freqConv = freq.ToString("0000000000");
             var temp = PcrDef.PCRFRQ + freqConv + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
-            var resp = this._pcrComm.SendWait(temp);
-            if (this.PcrCheckResponse(resp)) {
-                this._pcrRadio.PcrFreq = freq;
-                Debug.WriteLine("PcrControl PcrSetFreq - Success");
-                return true;
-            }
+            this._pcrComm.SendWait(temp, (resp) => {
+                if (this.PcrCheckResponse(resp)) {
+                    this._pcrRadio.PcrFreq = freq;
+                    Debug.WriteLine("PcrControl PcrSetFreq - Success");
+                    return callback(true);
+                }
+                Debug.WriteLine("PcrControl PcrSetFreq - Failed");
+                return callback(false);
+            });
         }
-        Debug.WriteLine("PcrControl PcrSetFreq - Failed");
-        return false;
     }
         
     /// <summary>
@@ -565,7 +653,7 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="mode">Plain text string of mode (eg: "USB")</param>
     /// <returns>True or false based on success or failure.</returns>
-    PcrSetMode(mode)
+    PcrSetMode(mode, callback)
     {
         Debug.WriteLine("Setting PcrRadio.PcrMode");
         mode = mode.ToLower();
@@ -588,7 +676,9 @@ module.exports = class PcrControl
         }
             
         var temp = PcrDef.PCRFRQ + this._pcrRadio.PcrFreq.ToString("0000000000") + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
-        return this.PcrCheckResponse(this._pcrComm.SendWait(temp));
+        this._pcrComm.SendWait(temp, (response) => {
+            callback(this.PcrCheckResponse(response));
+        });
     }
         
     /// <summary>
@@ -604,12 +694,14 @@ module.exports = class PcrControl
     /// <returns>
     /// True, on success otherwise returns false.
     /// </returns>
-    PcrSetNb(value)
+    PcrSetNb(value, callback)
     {
         Debug.WriteLine("PcrControl PcrSetNb");
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(value ? PcrDef.PCRNBON : PcrDef.PCRNBOFF))) return false;
-        this._pcrRadio.PcrNoiseBlank = value;
-        return true;
+        this._pcrComm.SendWait(value ? PcrDef.PCRNBON : PcrDef.PCRNBOFF, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrRadio.PcrNoiseBlank = value;
+            return callback(true);
+        });
     }
         
     /// <summary>
@@ -620,18 +712,19 @@ module.exports = class PcrControl
     /// <returns>
     /// True or false if the serial device can be opened on the new port.
     /// </returns>
-    PcrSetPort(communicationPort)
+    PcrSetPort(communicationPort, callback)
     {
         Debug.WriteLine("PcrControl PcrSetPort");
         this._pcrComm.PcrClose();
         try {
             this._pcrComm = communicationPort;
-            this._pcrComm.PcrOpen();
-            this._pcrComm.AutoUpdate = this._pcrRadio.PcrAutoUpdate;
-            return true;
+            this._pcrComm.PcrOpen((data) => {
+                this._pcrComm.AutoUpdate = this._pcrRadio.PcrAutoUpdate;
+                callback(data);
+            });
         }
-        catch (Exception) {
-            return false;
+        catch (e) {
+            return callback(false);
         }
     }
         
@@ -648,69 +741,15 @@ module.exports = class PcrControl
     /// <returns>
     /// True, on success otherwise returns false.
     /// </returns>
-    PcrSetRfAttenuator(value)
+    PcrSetRfAttenuator(value, callback)
     {
         Debug.WriteLine("PcrControl PcrSetRfAttenuator");
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(value ? PcrDef.PCRRFAON : PcrDef.PCRRFAOFF))) return false;
-        this._pcrRadio.PcrRfAttenuator = value;
-        return true;
-    }
+        this._pcrComm.SendWait(value ? PcrDef.PCRRFAON : PcrDef.PCRRFAOFF, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrRadio.PcrRfAttenuator = value;
+            return callback(true);
+        });
         
-    /// <summary>
-    ///     Sets the speed for current session.
-    ///     First we check to see if the baudrate passed 
-    ///     in \a speed is right, if not then we just quietly 
-    ///     return false. Then we decode \a speed and set 
-    ///     #PcrInitSpeed to #pcrcmd_t version.
-    ///     Then we tell the radio to switch speeds and
-    ///     set baudrate on the port by destroying PComm
-    ///     and reinitiating it with the new baud setting
-    ///     Warning: follow these procedures to use this function.
-    ///     -create the object (at last known baudrate).
-    ///     -call init
-    ///     -call power up
-    ///     -call this function
-    ///     -delete the object
-    ///     -create the object with the new speed setting
-    /// </summary>
-    /// <param name="speed">Speed baudrate.</param>
-    /// <returns>True or false based on success.</returns>
-    PcrSetSpeed(speed)
-    {
-        Debug.WriteLine("PcrControl PcrSetSpeed");
-        if ((300 > speed) || (speed > 38400)) return false;
-        switch (speed) {
-            case 38400:
-                // you probably want to set the speed
-                // to fastest available, so let's put
-                // this here first
-                this._pcrRadio.PcrInitSpeed = PcrDef.PCRBD38400;
-                break;
-            case 19200:
-                this._pcrRadio.PcrInitSpeed = PcrDef.PCRBD19200;
-                break;
-            case 300:
-                this._pcrRadio.PcrInitSpeed = PcrDef.PCRBD300;
-                break;
-            case 1200:
-                this._pcrRadio.PcrInitSpeed = PcrDef.PCRBD1200;
-                break;
-            case 2400:
-                this._pcrRadio.PcrInitSpeed = PcrDef.PCRBD2400;
-                break;
-            default:
-                // if all else fails, we'll always
-                // have paris! ~=^)
-                this._pcrRadio.PcrInitSpeed = PcrDef.PCRBD9600;
-                break;
-        }
-        this._pcrComm.Send(this._pcrRadio.PcrInitSpeed);
-        this._pcrComm.PcrClose();
-        this._pcrComm = new PcrSerialComm(this._pcrRadio.PcrPort, speed);
-        // investigate possible responses, i dont think one is given.
-        // PcrCheckResponse();
-        this._pcrRadio.PcrSpeed = speed;
-        return true;
     }
         
     /// <summary>
@@ -726,15 +765,17 @@ module.exports = class PcrControl
     /// true or false based on #PcrCheckResponse to indicate
     /// success or failure
     /// </returns>
-    PcrSetSquelch(squelch)
+    PcrSetSquelch(squelch, callback)
     {
         Debug.WriteLine("PcrControl PcrSetSquelch");
-        if ((0 > squelch) || (squelch > 100)) return false;
+        if ((0 > squelch) || (squelch > 100)) return callback(false);
         squelch = parseInt((256.0 / 100.0) * squelch);
         var temp = PcrDef.PCRSQL + squelch.ToString("X2");
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(temp))) return false;
-        this._pcrRadio.PcrSquelch = squelch;
-        return true;
+        this._pcrComm.SendWait(temp, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrRadio.PcrSquelch = squelch;
+            return callback(true);
+        });
     }
         
     /// <summary>
@@ -747,13 +788,15 @@ module.exports = class PcrControl
     /// <returns>
     /// true or false based on #PcrCheckResponse success or failure.
     /// </returns>
-    PcrSetToneSq(value)
+    PcrSetToneSq(value, callback)
     {
         Debug.WriteLine("PcrControl PcrSetTonSq");
         var temp = PcrDef.PCRTSQL + value;
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(temp))) return false;
-        this._pcrRadio.PcrToneSq = value;
-        return true;
+        this._pcrComm.SendWait(temp, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrRadio.PcrToneSq = value;
+            return callback(true);
+        });
     }
         
     /// <summary>
@@ -770,7 +813,7 @@ module.exports = class PcrControl
     /// success or failure. On failure, it turns off CTCSS
     /// and returns false.
     /// </returns>
-    PcrSetToneSq(passValue)
+    PcrSetToneSq(passValue, callback)
     {
         Debug.WriteLine("PcrControl PcrSetToneSq");
             
@@ -779,111 +822,111 @@ module.exports = class PcrControl
             
         switch (tone) {
             case 0:
-                return this.PcrSetToneSq("00");
+                return this.PcrSetToneSq("00", callback);
             case 670:
-                return this.PcrSetToneSq("01");
+                return this.PcrSetToneSq("01", callback);
             case 693:
-                return this.PcrSetToneSq("02");
+                return this.PcrSetToneSq("02", callback);
             case 710:
-                return this.PcrSetToneSq("03");
+                return this.PcrSetToneSq("03", callback);
             case 719:
-                return this.PcrSetToneSq("04");
+                return this.PcrSetToneSq("04", callback);
             case 744:
-                return this.PcrSetToneSq("05");
+                return this.PcrSetToneSq("05", callback);
             case 770:
-                return this.PcrSetToneSq("06");
+                return this.PcrSetToneSq("06", callback);
             case 797:
-                return this.PcrSetToneSq("07");
+                return this.PcrSetToneSq("07", callback);
             case 825:
-                return this.PcrSetToneSq("08");
+                return this.PcrSetToneSq("08", callback);
             case 854:
-                return this.PcrSetToneSq("09");
+                return this.PcrSetToneSq("09", callback);
             case 885:
-                return this.PcrSetToneSq("0A");
+                return this.PcrSetToneSq("0A", callback);
             case 915:
-                return this.PcrSetToneSq("0B");
+                return this.PcrSetToneSq("0B", callback);
             case 948:
-                return this.PcrSetToneSq("0C");
+                return this.PcrSetToneSq("0C", callback);
             case 974:
-                return this.PcrSetToneSq("0D");
+                return this.PcrSetToneSq("0D", callback);
             case 1000:
-                return this.PcrSetToneSq("0E");
+                return this.PcrSetToneSq("0E", callback);
             case 1035:
-                return this.PcrSetToneSq("0F");
+                return this.PcrSetToneSq("0F", callback);
             case 1072:
-                return this.PcrSetToneSq("10");
+                return this.PcrSetToneSq("10", callback);
             case 1109:
-                return this.PcrSetToneSq("11");
+                return this.PcrSetToneSq("11", callback);
             case 1148:
-                return this.PcrSetToneSq("12");
+                return this.PcrSetToneSq("12", callback);
             case 1188:
-                return this.PcrSetToneSq("13");
+                return this.PcrSetToneSq("13", callback);
             case 1230:
-                return this.PcrSetToneSq("14");
+                return this.PcrSetToneSq("14", callback);
             case 1273:
-                return this.PcrSetToneSq("15");
+                return this.PcrSetToneSq("15", callback);
             case 1318:
-                return this.PcrSetToneSq("16");
+                return this.PcrSetToneSq("16", callback);
             case 1365:
-                return this.PcrSetToneSq("17");
+                return this.PcrSetToneSq("17", callback);
             case 1413:
-                return this.PcrSetToneSq("18");
+                return this.PcrSetToneSq("18", callback);
             case 1462:
-                return this.PcrSetToneSq("19");
+                return this.PcrSetToneSq("19", callback);
             case 1514:
-                return this.PcrSetToneSq("1A");
+                return this.PcrSetToneSq("1A", callback);
             case 1567:
-                return this.PcrSetToneSq("1B");
+                return this.PcrSetToneSq("1B", callback);
             case 1598:
-                return this.PcrSetToneSq("1C");
+                return this.PcrSetToneSq("1C", callback);
             case 1622:
-                return this.PcrSetToneSq("1D");
+                return this.PcrSetToneSq("1D", callback);
             case 1655:
-                return this.PcrSetToneSq("1E");
+                return this.PcrSetToneSq("1E", callback);
             case 1679:
-                return this.PcrSetToneSq("1F");
+                return this.PcrSetToneSq("1F", callback);
             case 1713:
-                return this.PcrSetToneSq("20");
+                return this.PcrSetToneSq("20", callback);
             case 1738:
-                return this.PcrSetToneSq("21");
+                return this.PcrSetToneSq("21", callback);
             case 1773:
-                return this.PcrSetToneSq("22");
+                return this.PcrSetToneSq("22", callback);
             case 1799:
-                return this.PcrSetToneSq("23");
+                return this.PcrSetToneSq("23", callback);
             case 1835:
-                return this.PcrSetToneSq("24");
+                return this.PcrSetToneSq("24", callback);
             case 1862:
-                return this.PcrSetToneSq("25");
+                return this.PcrSetToneSq("25", callback);
             case 1899:
-                return this.PcrSetToneSq("26");
+                return this.PcrSetToneSq("26", callback);
             case 1928:
-                return this.PcrSetToneSq("27");
+                return this.PcrSetToneSq("27", callback);
             case 1966:
-                return this.PcrSetToneSq("28");
+                return this.PcrSetToneSq("28", callback);
             case 1995:
-                return this.PcrSetToneSq("29");
+                return this.PcrSetToneSq("29", callback);
             case 2035:
-                return this.PcrSetToneSq("2A");
+                return this.PcrSetToneSq("2A", callback);
             case 2065:
-                return this.PcrSetToneSq("2B");
+                return this.PcrSetToneSq("2B", callback);
             case 2107:
-                return this.PcrSetToneSq("2C");
+                return this.PcrSetToneSq("2C", callback);
             case 2181:
-                return this.PcrSetToneSq("2D");
+                return this.PcrSetToneSq("2D", callback);
             case 2257:
-                return this.PcrSetToneSq("2E");
+                return this.PcrSetToneSq("2E", callback);
             case 2291:
-                return this.PcrSetToneSq("2F");
+                return this.PcrSetToneSq("2F", callback);
             case 2336:
-                return this.PcrSetToneSq("30");
+                return this.PcrSetToneSq("30", callback);
             case 2418:
-                return this.PcrSetToneSq("31");
+                return this.PcrSetToneSq("31", callback);
             case 2503:
-                return this.PcrSetToneSq("32");
+                return this.PcrSetToneSq("32", callback);
             case 2541:
-                return this.PcrSetToneSq("33");
+                return this.PcrSetToneSq("33", callback);
             default:
-                this.PcrSetToneSq("00");
+                this.PcrSetToneSq("00", callback);
                 break;
         }
         return false;
@@ -900,44 +943,47 @@ module.exports = class PcrControl
     /// <returns>
     /// true or false based on #PcrCheckResponse to indicate success or failure
     /// </returns>
-    PcrSetVolume(volume)
+    PcrSetVolume(volume, callback)
     {
         Debug.WriteLine("PcrControl PcrSetVolume");
-        if ((0 > volume) || (volume > 100)) return false;
+        if ((0 > volume) || (volume > 100)) return callback(false);
         volume = parseInt((256.0 / 100.0) * volume);
         var temp = PcrDef.PCRVOL + volume.ToString("X2");
-        if (!this.PcrCheckResponse(this._pcrComm.SendWait(temp))) return false;
-        this._pcrRadio.PcrVolume = volume;
-        return true;
+    
+        this._pcrComm.SendWait(temp, (response) => {
+            if (!this.PcrCheckResponse(response)) return callback(false);
+            this._pcrRadio.PcrVolume = volume;
+            return callback(true);
+        });
     }
         
     /// <summary>
     ///     Querys the signal strength.
     /// </summary>
     /// <returns>integer value of 0-255 on signal strength.</returns>
-    PcrSigStrength()
+    PcrSigStrength(callback)
     {
         Debug.WriteLine("PcrControl PcrSigStrength");
+        this._pcrComm.SendWait(PcrDef.PCRQRST, (temp) => {
+            let sigstr;
+            if (temp === "") return callback(0);
+            var digit = temp[2];
+            if ((digit >= 'A') && (digit <= 'F')) {
+                sigstr = (digit - 'A' + 1) * 16;
+            }
+            else {
+                sigstr = parseInt(digit + '') * 16;
+            }
             
-        let sigstr;
-        var temp = this._pcrComm.SendWait(PcrDef.PCRQRST);
-        if (temp === "") return 0;
-        var digit = temp[2];
-        if ((digit >= 'A') && (digit <= 'F')) {
-            sigstr = (digit - 'A' + 1) * 16;
-        }
-        else {
-            sigstr = parseInt(digit + '') * 16;
-        }
-            
-        digit = temp[3];
-        if ((digit >= 'A') && (digit <= 'F')) {
-            sigstr += digit - 'A' + 1;
-        }
-        else {
-            sigstr += parseInt(digit + '');
-        }
-        return sigstr;
+            digit = temp[3];
+            if ((digit >= 'A') && (digit <= 'F')) {
+                sigstr += digit - 'A' + 1;
+            }
+            else {
+                sigstr += parseInt(digit + '');
+            }
+            return callback(sigstr);
+        });
     }
         
     /// <summary>
@@ -949,11 +995,12 @@ module.exports = class PcrControl
     /// header, plus the last two characters which is the
     /// \b hex value from \a 00-99
     /// </returns>
-    PcrSigStrengthStr()
+    PcrSigStrengthStr(callback)
     {
         Debug.WriteLine("PcrControl PcrSigStrengthStr");
-        var sigstr = this._pcrComm.SendWait(PcrDef.PCRQRST);
-        return sigstr === "" ? null : sigstr;
+        this._pcrComm.SendWait(PcrDef.PCRQRST, (response) => {
+            return callback(response === "" ? null : response);
+        });
     }
         
     /// <summary>
@@ -969,77 +1016,4 @@ module.exports = class PcrControl
 ///     Stores the important radio information for the current
 ///     state of the radio.
 /// </summary>
-module.exports.prototype.PRadInf = class PRadInf
-{
-    constructor() {
-        /// <summary>
-        ///     Currenly set autogain
-        /// </summary>
-        this.PcrAutoGain = null;
-    
-        /// <summary>
-        ///     Currently set update mode?
-        /// </summary>
-        this.PcrAutoUpdate = null;
-    
-        /// <summary>
-        ///     Currently set radio Filter [128]
-        /// </summary>
-        this.PcrFilter = null; //[128];
-    
-        /// <summary>
-        ///     Currently set frequency
-        /// </summary>
-        this.PcrFreq = null;
-    
-        /// <summary>
-        ///     Currently set speed (char * version, unstable) [8]
-        /// </summary>
-        this.PcrInitSpeed = null; //[8];
-    
-        /// <summary>
-        ///     Currently set radio Mode [128]
-        /// </summary>
-        this.PcrMode = null; //[128];
-    
-        /// <summary>
-        ///     Currently set noiseblanking
-        /// </summary>
-        this.PcrNoiseBlank = null;
-    
-        /// <summary>
-        ///     Currently active port/device [64]
-        /// </summary>
-        this.PcrPort = null; // = new char[64];
-    
-        /// <summary>
-        ///     Currently set RF Attenuation
-        /// </summary>
-        this.PcrRfAttenuator = null;
-    
-        /// <summary>
-        ///     Currently set speed (uint var)
-        /// </summary>
-        this.PcrSpeed = null;
-    
-        /// <summary>
-        ///     Currently set squlech
-        /// </summary>
-        this.PcrSquelch = null;
-    
-        /// <summary>
-        ///     Currently set CTCSS (unstable)
-        /// </summary>
-        this.PcrToneSq = null;
-    
-        /// <summary>
-        ///     Currently set CTCSS (float)
-        /// </summary>
-        this.PcrToneSqFloat = null;
-    
-        /// <summary>
-        ///     Currently set volume
-        /// </summary>
-        this.PcrVolume = null;
-    }
-}
+module.exports.prototype.PRadInf = PRadInf;

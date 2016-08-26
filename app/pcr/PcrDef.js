@@ -14,7 +14,7 @@
 /// <summary>
 /// Class containing PCR1000 commands.
 /// </summary>
-module.exports = class PcrDef {};
+let PcrDef = module.exports = class {};
 
 /*
 This is the PCR-1000 Command Set define file. Basically this file
@@ -313,7 +313,7 @@ PcrDef.prototype.PCRABAD = "G001";
 /// <summary>
 /// DSP Header (PCRQDSP)
 /// </summary>
-PcrDef.prototype.PCRADSP = PCRQDSP;
+PcrDef.prototype.PCRADSP = PcrDef.prototype.PCRQDSP;
 /// <summary>
 /// Not present (GD00)
 /// </summary>
@@ -325,7 +325,7 @@ PcrDef.prototype.PCRADSPOK = "GD01";
 /// <summary>
 /// Squelch Header (PCRQSQL)
 /// </summary>
-PcrDef.prototype.PCRASQL = PCRQSQL;
+PcrDef.prototype.PCRASQL = PcrDef.prototype.PCRQSQL;
 /// <summary>
 /// Sqlch Closed (04)
 /// </summary>
@@ -339,13 +339,13 @@ PcrDef.prototype.PCRASQLOPN = "07";
 /// \b note: You have this header
 ///          plus 00-FF from weak to strong
 /// </summary>
-PcrDef.prototype.PCRARST = PCRQRST;
+PcrDef.prototype.PCRARST = PcrDef.prototype.PCRQRST;
 /// <summary>
 /// Frequency offset Header (PCRQOFST)
 ///	\b note: plus 00-7F from extreme (-) to near ctr OR
 ///          plus 81-FF from near ctr to extreme (+)
 /// </summary>
-PcrDef.prototype.PCRAOFST = PCRQOFST;
+PcrDef.prototype.PCRAOFST = PcrDef.prototype.PCRQOFST;
 /// <summary>
 /// Frequency (offset) centered (I280)
 /// </summary>
@@ -354,7 +354,7 @@ PcrDef.prototype.PCRAOFSTCTR = "I280";
 /// <summary>
 /// DTMF Header (PCRQDTMF)
 /// </summary>
-PcrDef.prototype.PCRADTMF = PCRQDTMF;
+PcrDef.prototype.PCRADTMF = PcrDef.prototype.PCRQDTMF;
 /// <summary>
 /// DTMF Not Heard (I300)
 /// </summary>

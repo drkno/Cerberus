@@ -15,7 +15,7 @@ let setupServer = (config) => {
 };
 
 let setupRadio = (config) => {
-    let comm = new PcrNetworkClient(),
+    let comm = new PcrNetworkClient('192.168.1.9', 4456),
         control = new PcrControl(comm);
     return control;
 };
