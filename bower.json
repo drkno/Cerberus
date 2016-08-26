@@ -1,5 +1,5 @@
 {
-  "name": "cerebus",
+  "name": "cerberus",
   "version": "1.0.0",
   "homepage": "",
   "license": "MIT",
@@ -25,5 +25,8 @@
     "angular-chart.js": "^0.9.0",
     "angular-socket-io": "^0.7.0",
     "socket.io-client": "^1.4.5"
+  },
+  "resolutions": {
+    "angular": "^1.5.0"
   }
 }
