@@ -40,8 +40,9 @@ module.exports = class PassManager extends EventEmitter {
         this._updateTleList(() => {
             this._updatePassList();
         });
-        this.tleInterval = setInterval(this._updateTleList, tleTime);
-        this.passInterval = setInterval(this._updatePassList, passTime);
+        // unbindable arrow functions get bound through some magic within setInterval
+        this.tleInterval = setInterval(function(){this._updateTleList();}.bind(this), tleTime);
+        this.passInterval = setInterval(function(){this._updatePassList();}.bind(this), passTime);
         this.emit('start');
     }
 
@@ -57,6 +58,7 @@ module.exports = class PassManager extends EventEmitter {
     }
 
     _updateTleList(callback) {
+        console.log('Updating TLEs...');
         request.post({url: 'https://www.space-track.org/ajaxauth/login', form: {
             identity: this.username,
             password: this.password,
@@ -68,7 +70,7 @@ module.exports = class PassManager extends EventEmitter {
             }
             else {
                 this.satellites = JSON.parse(body);
-                console.log('Pass list update complete.');
+                console.log('TLE update complete.');
                 if (callback) {
                     callback();
                 }
@@ -77,12 +79,12 @@ module.exports = class PassManager extends EventEmitter {
     }
 
     _updatePassList() {
+        console.log('Updating Pass List...');
         let start = new Date(),
             end = new Date(),
             newPassList = [];
 
         end.setDate(start.getDate()+14);
-
         for (let satellite of this.satellites) {
             let tle = satellite.TLE_LINE0 + '\n' + satellite.TLE_LINE1 + '\n' + satellite.TLE_LINE2;
             let passes = jspredict.transits(tle, this.qth, start, end, this.minElevation, this.maxPassesPerSatellite);
@@ -101,6 +103,7 @@ module.exports = class PassManager extends EventEmitter {
             return 0;
         });
         this.passList = newPassList;
+        console.log('Pass List Update complete.');
         this.emit('update', newPassList);
     }
 

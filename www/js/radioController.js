@@ -6,7 +6,7 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
           filter: '3k',
           toneSquelch: 'Off',
           afGain: 50,
-          squelch: 00,
+          squelch: 0,
           noiseBlank: false,
           frequency: 101000000,
           audioUrl: 'http://about:blank'
