@@ -1,7 +1,9 @@
-﻿/*
+'use strict';
+
+/*
  * PcrControl
  * Control component of the PCR1000 Library
- * 
+ *
  * Copyright Matthew Knox © 2013-Present.
  * This program is distributed with no warentee or garentee
  * what so ever. Do what you want with it as long as attribution
@@ -11,13 +13,8 @@
  * British English where the language allows.
  */
 
-let PcrDef = require('./PcrDef.js');
-
-let Debug = {
-    WriteLine: (text) => {
-        console.log(text);
-    }
-}
+let PcrDef = require('./PcrDef.js'),
+    Debug = require('./PcrDebug.js')('Control');
 
 /// <summary>
 ///     Stores the important radio information for the current
@@ -145,7 +142,7 @@ module.exports = class PcrControl
             readyCallback();
         });
     }
-        
+
     /// <summary>
     ///     Internally called method to check radio response.
     ///     Read from the radio for the #PCRAOK and #PCRABAD reply.
@@ -161,16 +158,17 @@ module.exports = class PcrControl
     {
         Debug.WriteLine("PcrControl PcrCheckResponse");
         if (!overrideAutoupdate && this._pcrComm.AutoUpdate) return true;
-            
+
         if (response === PcrDef.PCRAOK || response === PcrDef.PCRBOK) {
             return true;
         }
-        if (response === PcrDef.PCRABAD) {
-            return false;
-        }
+        // if (response === PcrDef.PCRABAD) {
+        //     return false;
+        // }
+        Debug.Fail("PcrControl PcrCheckResponse -> Failure response was sent.");
         return false;
     }
-        
+
     /// <summary>
     ///     Get current session's autogain value.
     ///     Checks #PcrRadio struct for member #PcrAutoGain
@@ -184,7 +182,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetAutoGain");
         return this._pcrRadio.PcrAutoGain;
     }
-        
+
     /// <summary>
     ///     Get current session's autogain value.
     /// </summary>
@@ -194,7 +192,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl GetAutoGainStr");
         return this.PcrGetAutoGain() ? "1" : "0";
     }
-        
+
     /// <summary>
     ///     Get the current session's filter setting.
     /// </summary>
@@ -204,7 +202,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetFilter");
         return this._pcrRadio.PcrFilter;
     }
-        
+
     /// <summary>
     ///     Get the current session's filter setting.
     /// </summary>
@@ -215,26 +213,26 @@ module.exports = class PcrControl
         if (PcrDef.PCRFLTR230 === this._pcrRadio.PcrFilter) {
             return "230";
         }
-            
+
         if (PcrDef.PCRFLTR50 === this._pcrRadio.PcrFilter) {
             return "50";
         }
-            
+
         if (PcrDef.PCRFLTR15 === this._pcrRadio.PcrFilter) {
             return "15";
         }
-            
+
         if (PcrDef.PCRFLTR6 === this._pcrRadio.PcrFilter) {
             return "6";
         }
-            
+
         if (PcrDef.PCRFLTR3 === this._pcrRadio.PcrFilter) {
             return "3";
         }
-            
+
         return this._pcrRadio.PcrFilter;
     }
-        
+
     /// <summary>
     ///     Gets current session's frequency setting.
     /// </summary>
@@ -244,7 +242,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetFreq");
         return this._pcrRadio.PcrFreq;
     }
-        
+
     /// <summary>
     ///     Gets current session's frequency setting.
     /// </summary>
@@ -254,7 +252,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetFreqStr");
         return this.padDigits(this._pcrRadio.PcrFreq, 10);
     }
-        
+
     /// <summary>
     ///     Gets current session's mode setting.
     /// </summary>
@@ -264,7 +262,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetMode");
         return this._pcrRadio.PcrMode;
     }
-        
+
     /// <summary>
     ///     Gets current session's mode setting.
     /// </summary>
@@ -275,30 +273,30 @@ module.exports = class PcrControl
         if (PcrDef.PCRMODWFM === this._pcrRadio.PcrMode) {
             return "WFM";
         }
-            
+
         if (PcrDef.PCRMODNFM === this._pcrRadio.PcrMode) {
             return "NFM";
         }
-            
+
         if (PcrDef.PCRMODCW === this._pcrRadio.PcrMode) {
             return "CW";
         }
-            
+
         if (PcrDef.PCRMODAM === this._pcrRadio.PcrMode) {
             return "AM";
         }
-            
+
         if (PcrDef.PCRMODUSB === this._pcrRadio.PcrMode) {
             return "USB";
         }
-            
+
         if (PcrDef.PCRMODLSB === this._pcrRadio.PcrMode) {
             return "LSB";
         }
-            
+
         return "UNKNOWN";
     }
-        
+
     /// <summary>
     ///     Get current session's noiseblank value.
     /// </summary>
@@ -308,7 +306,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetNb");
         return this._pcrRadio.PcrNoiseBlank;
     }
-        
+
     /// <summary>
     ///     Get current session's noiseblank value.
     /// </summary>
@@ -318,7 +316,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetNbStr");
         return this.PcrGetNb() ? "1" : "0";
     }
-        
+
     /// <summary>
     ///     Gets current port / serial device setting.
     /// </summary>
@@ -328,7 +326,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetPort");
         return this._pcrRadio.PcrPort;
     }
-        
+
     /// <summary>
     ///     Retrieves the current radio struct.
     /// </summary>
@@ -338,7 +336,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetRadioInfo");
         return this._pcrRadio;
     }
-        
+
     /// <summary>
     ///     Sets the radio structure and values then updates the radio to reflect them.
     ///     PcrSpeed and PcrPort are currently ignored due to implementation bugs.
@@ -361,7 +359,7 @@ module.exports = class PcrControl
         this.PcrSetToneSq(radioInf.PcrToneSqFloat, ()=>{});
         this.PcrSetVolume(radioInf.PcrVolume, ()=>{});
     }
-        
+
     /// <summary>
     ///     Get current session's RF Attenuation value.
     /// </summary>
@@ -371,7 +369,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetRfAttenuator");
         return this._pcrRadio.PcrRfAttenuator;
     }
-        
+
     /// <summary>
     ///     Get current session's RF Attenuation value.
     /// </summary>
@@ -381,7 +379,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetRfAttenuatorStr");
         return this.PcrGetRfAttenuator() ? "1" : "0";
     }
-        
+
     /// <summary>
     ///     Gets current speed.
     /// </summary>
@@ -391,7 +389,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetSpeedT");
         return this._pcrRadio.PcrSpeed;
     }
-        
+
     /// <summary>
     ///     Gets current speed.
     /// </summary>
@@ -415,7 +413,7 @@ module.exports = class PcrControl
                 return "Unknown";
         }
     }
-        
+
     /// <summary>
     ///     Gets current session's squelch setting.
     /// </summary>
@@ -425,7 +423,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetSquelch");
         return this._pcrRadio.PcrSquelch;
     }
-        
+
     /// <summary>
     ///     Gets current session's squelch setting.
     /// </summary>
@@ -435,7 +433,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetSquelchStr");
         return this._pcrRadio.PcrSquelch + '';
     }
-        
+
     /// <summary>
     ///     Gets the current session's tone squelch (undecoded version).
     /// </summary>
@@ -445,7 +443,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetToneSq");
         return this._pcrRadio.PcrToneSq;
     }
-        
+
     /// <summary>
     ///     Gets the current session's tone squelch (decoded version).
     /// </summary>
@@ -455,7 +453,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetToneSqStr");
         return this._pcrRadio.PcrToneSqFloat + '';
     }
-        
+
     /// <summary>
     ///     Gets current session's volume setting.
     /// </summary>
@@ -465,7 +463,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetVolume");
         return this._pcrRadio.PcrVolume;
     }
-        
+
     /// <summary>
     ///     Gets current session's volume setting.
     /// </summary>
@@ -475,7 +473,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrGetVolumeStr");
         return this.PcrGetVolume() + '';
     }
-        
+
     /// <summary>
     ///     Initialise the radio.
     /// </summary>
@@ -485,7 +483,7 @@ module.exports = class PcrControl
     {
         Debug.WriteLine("PcrControl PcrInit");
         Debug.WriteLine("Radio is coming up. Please wait...\n");
-            
+
         if (!this._pcrStatus) {
             callback(false);
             return;
@@ -497,7 +495,7 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Inquire radio status.
     /// </summary>
@@ -507,7 +505,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrIsOn");
         return this._pcrStatus;
     }
-        
+
     /// <summary>
     ///     Powers the radio down.
     /// </summary>
@@ -521,7 +519,7 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Powers the radio on.
     /// </summary>
@@ -535,7 +533,7 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Querys radio acutator status.
     /// </summary>
@@ -548,9 +546,9 @@ module.exports = class PcrControl
             if (response === "") return callback(false);
             return callback(response === "H101");
         });
-        
+
     }
-        
+
     /// <summary>
     ///     Querys radio's squelch status.
     /// </summary>
@@ -564,7 +562,7 @@ module.exports = class PcrControl
             return callback(temp === tempvar1);
         });
     }
-        
+
     /// <summary>
     ///     Toggle autogain functionality.
     /// </summary>
@@ -578,7 +576,7 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Sets current session's filter.
     /// </summary>
@@ -601,13 +599,13 @@ module.exports = class PcrControl
             default:
                 callback(false); return;
         }
-            
+
         var temp = PcrDef.PCRFRQ + this.padDigits(this._pcrRadio.PcrFreq, 10) + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
         this._pcrComm.SendWait(temp, (response) => {
             return callback(this.PcrCheckResponse(response));
         });
     }
-        
+
     /// <summary>
     ///     Sets if autoupdate is enabled.
     /// </summary>
@@ -620,7 +618,7 @@ module.exports = class PcrControl
             }
         });
     }
-        
+
     /// <summary>
     ///     Sets current session's filter.
     /// </summary>
@@ -631,7 +629,7 @@ module.exports = class PcrControl
         Debug.WriteLine("PcrControl PcrSetFilter");
         return this.PcrSetFilter(filter + '', callback);
     }
-        
+
     /// <summary>
     ///     Set the current frequency.
     /// </summary>
@@ -643,14 +641,13 @@ module.exports = class PcrControl
         if ((PcrDef.LOWERFRQ <= freq) && (freq <= PcrDef.UPPERFRQ)) {
             var freqConv = this.padDigits(freq, 10);
             var temp = PcrDef.PCRFRQ + freqConv + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
-            this._pcrComm.SendWait(temp,
-            (resp) => {
+            this._pcrComm.SendWait(temp, (resp) => {
                 if (this.PcrCheckResponse(resp)) {
                     this._pcrRadio.PcrFreq = freq;
                     Debug.WriteLine("PcrControl PcrSetFreq - Success");
                     return callback(true);
                 }
-                Debug.WriteLine("PcrControl PcrSetFreq - Failed");
+                Debug.Fail("PcrControl PcrSetFreq - Failed");
                 return callback(false);
             });
         }
@@ -658,7 +655,7 @@ module.exports = class PcrControl
             throw new Error('Value out of allowed range.');
         }
     }
-        
+
     /// <summary>
     ///     Set the current session's mode.
     ///     Valid arguments for \a mode:
@@ -678,7 +675,7 @@ module.exports = class PcrControl
     {
         Debug.WriteLine("Setting PcrRadio.PcrMode");
         mode = mode.trim().toLowerCase();
-            
+
         switch (mode) {
             case "am":
                 this._pcrRadio.PcrMode = PcrDef.PCRMODAM; break;
@@ -695,13 +692,13 @@ module.exports = class PcrControl
             default:
                 callback(false); return;
         }
-            
+
         var temp = PcrDef.PCRFRQ + this.padDigits(this._pcrRadio.PcrFreq, 10) + this._pcrRadio.PcrMode + this._pcrRadio.PcrFilter + "00";
         this._pcrComm.SendWait(temp, (response) => {
             callback(this.PcrCheckResponse(response));
         });
     }
-        
+
     /// <summary>
     ///     Toggle Noiseblanking functionality.
     ///     Valid values for \a value are:
@@ -724,7 +721,7 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Set the communication port for the current session.
     ///     Sets port by closing the handle to the current one and opening the new one.
@@ -748,7 +745,7 @@ module.exports = class PcrControl
             callback(false);
         }
     }
-        
+
     /// <summary>
     ///     Toggle RF Attenuation functionality.
     ///     Valid values for \a value are:
@@ -770,15 +767,15 @@ module.exports = class PcrControl
             this._pcrRadio.PcrRfAttenuator = value;
             return callback(true);
         });
-        
+
     }
-        
+
     /// <summary>
     ///     Set the current session's squelch.
     ///     sprintf converts (and combines) the cmd #PCRSQL with
-    ///     the argument \a squelch , such that the argument has a 
-    ///     minimum field width of two chars. If the field 
-    ///     is less than 2 chars (ie: arg=5) then it pads the field 
+    ///     the argument \a squelch , such that the argument has a
+    ///     minimum field width of two chars. If the field
+    ///     is less than 2 chars (ie: arg=5) then it pads the field
     ///     with one zero.
     /// </summary>
     /// <param name="squelch">an integer between 0 and 100</param>
@@ -801,12 +798,12 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Sets current session CTCSS.
     ///     set's the tone squelch for the radio. The default is
     ///     value 00 for off. The values are \b NOT the hz, but the
-    ///     #pcrdef.h vals, 01=67.0 02=69.3 etc... 
+    ///     #pcrdef.h vals, 01=67.0 02=69.3 etc...
     /// </summary>
     /// <param name="value">character string of 01-35 hex</param>
     /// <returns>
@@ -822,7 +819,7 @@ module.exports = class PcrControl
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Sets session CTCSS based on a float value.
     ///     Since the previous method requires the programmer to
@@ -833,17 +830,17 @@ module.exports = class PcrControl
     /// </summary>
     /// <param name="passValue">tone squelch in Hz</param>
     /// <returns>
-    /// true or false based on #PcrCheckResponse 
+    /// true or false based on #PcrCheckResponse
     /// success or failure. On failure, it turns off CTCSS
     /// and returns false.
     /// </returns>
     PcrSetToneSqN(passValue, callback)
     {
         Debug.WriteLine("PcrControl PcrSetToneSq");
-            
+
         var tone = parseInt(passValue * 10.0 + .1);
         this._pcrRadio.PcrToneSqFloat = passValue;
-            
+
         switch (tone) {
             case 0:
                 return this.PcrSetToneSq("00", callback);
@@ -955,7 +952,7 @@ module.exports = class PcrControl
         }
         return callback(false);
     }
-        
+
     /// <summary>
     ///     Set the current session's volume.
     ///     sprintf converts (and combines) the cmd #PCRVOL with
@@ -976,14 +973,14 @@ module.exports = class PcrControl
         }
         volume = parseInt((255.0 / 100.0) * (+volume));
         var temp = PcrDef.PCRVOL + this.toHex(volume);
-    
+
         this._pcrComm.SendWait(temp, (response) => {
             if (!this.PcrCheckResponse(response)) return callback(false);
             this._pcrRadio.PcrVolume = volume;
             return callback(true);
         });
     }
-        
+
     /// <summary>
     ///     Querys the signal strength.
     /// </summary>
@@ -991,13 +988,13 @@ module.exports = class PcrControl
     PcrSigStrength(callback)
     {
         Debug.WriteLine("PcrControl PcrSigStrength");
-        this._pcrComm.SendWait(PcrDef.PCRQRST, (temp) => { 
+        this._pcrComm.SendWait(PcrDef.PCRQRST, (temp) => {
             if (temp === "") return callback(0);
             let sigstr = parseInt(temp.substr(2), 16);
             return callback(sigstr);
         });
     }
-        
+
     /// <summary>
     ///     Querys the signal strength.
     /// </summary>
@@ -1014,7 +1011,7 @@ module.exports = class PcrControl
             return callback(response === "" ? null : response);
         });
     }
-        
+
     /// <summary>
     /// Tidies up and releases the underlying radio from the control of this class.
     /// </summary>

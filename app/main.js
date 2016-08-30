@@ -4,6 +4,7 @@ let Server = require('./server/serve.js'),
     UserManager = require('./users/users.js'),
     PcrControl = require('./pcr/PcrControl.js'),
     PcrNetworkClient = require('./pcr/PcrNetworkComm.js'),
+    PassManager = require('./pass.js'),
     fs = require('fs'),
     path = require('path'),
     blankCallback = () => {};
@@ -31,11 +32,31 @@ let initialise = (control, settings) => {
 };
 
 let setupRadio = (config, settings) => {
-    let comm = new PcrNetworkClient('192.168.1.9', 4456),
+    let uri = config.radioControlHost,
+        port = config.radioControlPort || 4456
+    if (!uri || typeof port !== 'number') {
+        throw new Error('Radio settings are invalid.');
+    }
+    let comm = new PcrNetworkClient(uri, port),
         control = new PcrControl(comm, () => {
             initialise(control, settings);
         });
     return control;
+};
+
+let setupPassManager = (config) => {
+    let altitude = config.altitude,
+        latitude = config.latitude,
+        longitude = config.longitude,
+        username = config['space-track-username'],
+        password = config['space-track-password'];
+
+    if (!altitude || !latitude || !longitude || !username || !password) {
+        throw new Error('Cannot generate pass list...');
+    }
+    let passManager = new PassManager(username, password, latitude, longitude, altitude);
+    passManager.start();
+    return passManager;
 };
 
 exports.run = (config) => {
@@ -46,15 +67,26 @@ exports.run = (config) => {
             filter: '3k',
             toneSquelch: 'Off',
             afGain: 50,
-            squelch: 50,
+            squelch: 00,
             noiseBlank: false,
-            frequency: 10000000
+            frequency: 101000000,
+            audioUrl: config.radioAudioUrl
         },
-        control = setupRadio(config, settings);
-        
+        control = setupRadio(config, settings),
+        passManager = setupPassManager(config);
 
-    server.on('current', (socket) => {
-        socket.emit('current', settings);
+
+    let curr = (socket) => {
+        socket.emit('current', {
+            settings: settings,
+            passList: passManager.getPassList()
+        });
+    };
+    server.on('connect', curr);
+    server.on('current', curr);
+
+    passManager.on('update', (passList) => {
+        server.emit('passList', {passList: passList});
     });
 
     server.apiGet('images', (req, res) => {

@@ -1,17 +1,23 @@
 cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', function ($scope, $http, socket) {
 
       $scope.settings = {
-        power: false,
-        mode: 'AM',
-        filter: '3k',
-        toneSquelch: 'Off',
-        afGain: 50,
-        squelch: 50,
-        noiseBlank: false,
-        frequency: 10000000
+          power: false,
+          mode: 'AM',
+          filter: '3k',
+          toneSquelch: 'Off',
+          afGain: 50,
+          squelch: 00,
+          noiseBlank: false,
+          frequency: 101000000,
+          audioUrl: 'http://about:blank'
       };
 
-      $scope.signalStrength = 0;  
+      $scope.signalStrength = 0;
+      $scope.passList = [];
+
+      let padDigits = (number, digits) => {
+          return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+      };
 
       //#region power
       $scope.power = $scope.settings.power;
@@ -20,7 +26,7 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
           $scope.power = $scope.settings.power;
           socket.emit('power', { power: $scope.settings.power });
       };
-        
+
       socket.on('power', (data) => {
           $scope.settings.power = data.power;
           $scope.power = data.power;
@@ -40,7 +46,7 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
       $scope.modeChange = () => {
           socket.emit('mode', { mode: $scope.settings.mode });
       };
-      
+
       socket.on('mode', (data) => {
           $scope.settings.mode = data.mode;
       });
@@ -184,15 +190,17 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
           $scope.settings.frequency = data.frequency;
       });
 
+      $scope.$watch('settings.frequency', () => {
+          lcdFrequency.setIntValue($scope.settings.frequency);
+      });
       //#endregion
 
       //#region current
       socket.on('current', (data) => {
-          $scope.settings = data;
-          $scope.power = data.power;
+          $scope.settings = data.settings;
+          $scope.passList = data.passList;
+          $scope.power = data.settings.power;
       });
-
-      socket.emit('current');
       //#endregion
 
       //#region mute
@@ -210,5 +218,32 @@ cerberusControllers.controller('RadioController', ['$scope', '$http', 'socket', 
       });
       //#endregion
 
+      //#region passList
+      $scope.convertDate = (input) => {
+          let dt = new Date(input);
+          return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString();
+      };
+
+      $scope.toHumanReadableTime = (input) => {
+          let milliseconds = input % 1000;
+          input = (input - milliseconds) / 1000;
+          let seconds = input % 60;
+          input = (input - seconds) / 60;
+          let minutes = input % 60;
+          let hours = (input - minutes) / 60;
+
+          return padDigits(hours, 2) + ':' + padDigits(minutes, 2) + ':' + padDigits(seconds, 2);
+      };
+
+      socket.on('passList', (data) => {
+          $scope.passList = data.passList;
+      });
+      //#endregion
+
+      socket.on('reconnect', () => {
+          socket.emit('current');
+      });
+
+      socket.emit('current');
     }
 ]);

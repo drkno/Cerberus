@@ -21,7 +21,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md-9" style="display:inline-block;float:none">
+    <div class="col-md-9 col-sm-12" style="display:inline-block;float:none">
       <table class="table table-responsive table-condensed table-striped">
         <tr>
           <td></td>
@@ -84,26 +84,49 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-6">
-      <div justgage
-           title="Signal (%)" title-font-color="dimgray" title-position="below"
-           title-min-font-size="8px" value="{{signalStrength}}" value-font-color="black"
-           value-min-font-size="15px" human-friendly="true"
-           human-friendly-decimal="true" decimals="1" style="width:400px; display: inline-block"></div>
-    </div>
+  <div class="row" style="text-align:center">
+      <div class="col-md-9" style="float:none;display:inline-block">
+          <div class="row">
+              <div class="col-xs-4">
+                <div justgage
+                     title="Signal (%)" title-font-color="dimgray" title-position="below"
+                     title-min-font-size="8px" value="{{signalStrength}}" value-font-color="black"
+                     value-min-font-size="15px" human-friendly="true"
+                     human-friendly-decimal="true" decimals="1" style="width:400px; display: inline-block"></div>
+              </div>
 
-    <div class="col-md-6">
-      <div justgage
-           title="Signal (%)" title-font-color="dimgray" title-position="below"
-           title-min-font-size="8px" value="{{value}}" value-font-color="black"
-           value-min-font-size="15px" human-friendly="true"
-           human-friendly-decimal="true" decimals="1" style="width:400px; display: inline-block"></div>
-    </div>
+              <div class="col-xs-8">
+                  <span style="font-family:sans-serif;font-size:15px;font-weight:bold;color:#696969;line-height:11.4px;font-weight:700">Pass List</span>
+                  <br />
+                  <div style="overflow-y:scroll;height:280px">
+                      <table class="table table-striped">
+                          <thead>
+                              <tr>
+                                  <th style="text-align: center">Satellite</th>
+                                  <th style="text-align: center">Start</th>
+                                  <th style="text-align: center">Duration</th>
+                                  <th style="text-align: center">Elevation</th>
+                                  <th style="text-align: center">Peek Azimuth</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              <tr data-ng-repeat="pass in passList">
+                                  <td><b>{{pass.name}}</b></td>
+                                  <td>{{convertDate(pass.start)}}</td>
+                                  <td>{{toHumanReadableTime(pass.duration)}}</td>
+                                  <td>{{pass.maxElevation.toFixed(2)}}</td>
+                                  <td>{{pass.apexAzimuth.toFixed(2)}}</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+      </div>
   </div>
 
 </div>
 
 <div style="display:none">
-    <audio id="radioAudio" src="http://192.168.1.9:8000/PCR1000" autoplay="autoplay"/>
+    <audio id="radioAudio" audios code="settings.audioUrl" autoplay="autoplay"/>
 </div>

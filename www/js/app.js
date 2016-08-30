@@ -52,6 +52,23 @@ cerberusControllers.factory('socket', function (socketFactory) {
     return socket;
 });
 
+// http://stackoverflow.com/questions/23659395/can-i-use-angular-variables-as-the-source-of-an-audio-tag
+cerberusControllers.directive('audios', function($sce) {
+    return {
+        restrict: 'A',
+        scope: { code:'=' },
+        replace: true,
+        template: '<audio ng-src="{{url}}" controls></audio>',
+        link: function (scope) {
+            scope.$watch('code', function (newVal, oldVal) {
+                if (newVal !== undefined) {
+                    scope.url = $sce.trustAsResourceUrl(newVal);
+                }
+            });
+        }
+    };
+});
+
 Cerberus.run(['$route', ($route) => {
     $route.reload();
 }]);

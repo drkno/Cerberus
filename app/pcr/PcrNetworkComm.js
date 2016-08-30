@@ -1,7 +1,9 @@
+'use strict';
+
 ﻿/*
  * PcrNetwork
  * Network communication component of the PCR1000 Library
- * 
+ *
  * Copyright Matthew Knox © 2013-Present.
  * This program is distributed with no warentee or garentee
  * what so ever. Do what you want with it as long as attribution
@@ -12,13 +14,8 @@
  */
 
 const net = require('net'),
-    EventEmitter = require('events');
-
-let Debug = {
-    WriteLine: (text) => {
-        console.log(text);
-    }
-};
+    EventEmitter = require('events'),
+    Debug = require('./PcrDebug.js')('Network');
 
 let ClientRequestCode = {
     UNKNOWN: 0,
@@ -75,10 +72,15 @@ module.exports = class PcrNetworkClient extends EventEmitter
             }
 
 			Debug.WriteLine(this._server + ":" + this._port + " : RECV -> " + datarecv);
+
+            if (this._sendQueue.length > 0) {
+                let cmd = this._sendQueue.shift();
+                this._Send(cmd);
+            }
 		}
 		catch (e)
 		{
-			Debug.WriteLine("A socket read failure occurred:\n" + e.message + "\r\n" + e.stack);
+			Debug.Fail("A socket read failure occurred:\n" + e.message + "\r\n" + e.stack);
 		}
 	}
 
@@ -106,6 +108,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 	    this._listenActive = false;
 	    this.AutoUpdate = false;
 	    this._listenQueue = [];
+        this._sendQueue = [];
 	}
 
 	/// <summary>
@@ -122,7 +125,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 	/// </summary>
 	/// <param name="cmd">Command to send.</param>
 	/// <returns>Success.</returns>
-	Send(cmd)
+	_Send(cmd)
 	{
 		try
 		{
@@ -153,44 +156,20 @@ module.exports = class PcrNetworkClient extends EventEmitter
         if (!callback) {
             throw new Error('Use send instead of sendwait...');
         }
+
+        if (this._listenQueue.length > 10) {
+            this._sendQueue.shift();
+            this._listenQueue.shift();
+            Debug.Fail('Dropping command from long queue...');
+        }
+
 	    this._listenQueue.push(callback);
-		this.Send(cmd);
-	}
-
-	/// <summary>
-	/// Gets the latest message from the PCR1000.
-	/// </summary>
-	/// <returns>The latest message.</returns>
-	GetLastReceived()
-	{
-		Debug.WriteLine("PcrNetwork Last Recv");
-		try
-		{
-			return this._msgSlot1.Message;
-		}
-		catch (ex)
-		{
-			Debug.WriteLine(ex.Message);
-			return "";
-		}
-	}
-
-	/// <summary>
-	/// Gets the previously received message.
-	/// </summary>
-	/// <returns>The previous message.</returns>
-	GetPrevReceived()
-	{
-		Debug.WriteLine("PcrNetwork PrevRecv");
-		try
-		{
-			return this._msgSlot2.Message;
-		}
-		catch (ex)
-		{
-			Debug.WriteLine(ex.Message);
-			return "";
-		}
+        if (this._listenQueue.length > 1) {
+            this._sendQueue.push(cmd);
+        }
+        else {
+            this._Send(cmd);
+        }
 	}
 
 	/// <summary>
@@ -255,7 +234,7 @@ module.exports = class PcrNetworkClient extends EventEmitter
 	            this._tcpClient.destroy();
 	            this._tcpClient.Connected = false;
 			});
-			
+
 			return true;
 		}
 		catch (ex)
