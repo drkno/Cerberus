@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+This entire page is a hack to gracefully handle the shittiness of a rural internet connection.
+Please forgive me.
+-->
+<html>
+<head>
+<title>Cerberus</title>
+<link rel="icon" href="http://harest.makereti.co.nz:7999/favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<meta charset="utf-8" /> 
+<style>
+#contentSubFrame {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 500;
+}
+#overlayBG {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000000;
+	opacity: 0.8;
+	z-index: 1050;
+}
+#loadingHider {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+#loadingHiderModal {
+	top: 50%;
+	transform: translate(0%, -50%);
+	z-index: 1100;
+}
+#loadingModalHeader {
+	border-radius:5px 5px 0px 0px;
+}
+</style>
+</head>
+<body>
+
+<iframe src="about:blank" id="contentSubFrame" frameborder="0" scrolling="no"></iframe>
+
+<div id="loadingHider">
+	<div id="overlayBG"></div>
+	<div class="modal show uneditable" role="dialog" id="loadingHiderModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header btn-primary" id="loadingModalHeader">
+					<h4 class="modal-title" id="loadingModalTitle">Loading...</h4>
+				</div>
+				<div class="modal-body" id="loadingModalBody">
+					<p>Currently attempting to fetch the page from the remote location, please wait.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+const contentSubFrame = document.getElementById('contentSubFrame');
+let frameLoaded = false;	
+	
+contentSubFrame.onload = () => {
+	console.log(this)
+	if (frameLoaded || contentSubFrame.src.indexOf('about:blank') >= 0) {
+		return;
+	}
+	document.getElementById('loadingHider').style.display = 'none';
+	contentSubFrame.style.height = contentSubFrame.contentWindow.document.body.scrollHeight + 'px';
+	frameLoaded = true;
+};
+
+const notAlive = () => {
+	const loadingModalTitle = document.getElementById('loadingModalTitle'),
+		loadingModalBody = document.getElementById('loadingModalBody'),
+		loadingModalHeader = document.getElementById('loadingModalHeader');
+	loadingModalTitle.innerHTML = 'Loading Failed :(';
+	loadingModalBody.innerHTML = '<p>This server is hosted in a rural location with poor internet speed and intermittent power so loading may have failed for any number of reasons.</p>';
+	loadingModalHeader.className = 'modal-header btn-danger';
+	frameLoaded = true;
+};
+
+const checkAlive = () => {
+    const http = new XMLHttpRequest();
+    http.open('HEAD', 'http://harest.makereti.co.nz:7999/');
+    http.onreadystatechange = () => {
+        if (http.readyState == http.DONE) {
+			if (http.status === 200) {
+				contentSubFrame.src = 'http://harest.makereti.co.nz:7999/'
+			}
+			else {
+				notAlive();
+			}
+        }
+    };
+    http.send();
+}
+checkAlive();
+</script>
+</body>
+</html>
