@@ -1,0 +1,15 @@
+[Unit]
+Description=Cerberus Service
+After=multi-user.target
+
+[Service]
+Type=idle
+User=pi
+RemainAfterExit=yes
+ExecStart=/opt/pcrstart.sh
+ExecStop=/usr/bin/tmux kill-server
+WorkingDirectory=/home/pi
+KillMode=none
+
+[Install]
+WantedBy=multi-user.target
